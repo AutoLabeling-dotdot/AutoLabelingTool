@@ -1,3 +1,6 @@
+# !!! Be ensuer use ubuntu 22.04
+
+
 # AutoLabelingTool - Development Setup Guide
 
 This guide explains how to set up the development environment for **AutoLabelingTool** with backend (Django + CVAT), frontend (React + CVAT-UI), and required services.
