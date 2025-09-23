@@ -1,0 +1,68 @@
+services:
+  cvat_server:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server # 빌드된 이미지에 붙일 이름
+    volumes:
+      # 개발 중 빠른 반영을 원할 때 주석을 해제하여 사용 가능
+      # - ./cvat:/home/django/cvat:ro
+      - cvat_data:/home/django/data
+      - cvat_keys:/home/django/keys
+      - cvat_logs:/home/django/logs
+
+  cvat_ui:
+    build:
+      context: .
+      dockerfile: cvat-ui/Dockerfile
+    image: cvat/ui # 빌드된 이미지에 붙일 이름
+
+  # 다른 worker 서비스들도 server와 동일한 이미지를 사용하므로
+  # build 설정을 추가해줍니다.
+  cvat_worker_utils:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_import:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_export:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_annotation:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_webhooks:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_quality_reports:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_chunks:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
+
+  cvat_worker_consensus:
+    build:
+      context: .
+      dockerfile: cvat/Dockerfile
+    image: cvat/server
