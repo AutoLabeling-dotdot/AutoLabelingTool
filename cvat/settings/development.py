@@ -13,6 +13,7 @@ INSTALLED_APPS += [
 ]
 
 ALLOWED_HOSTS.append("testserver")
+ALLOWED_HOSTS.append("host.docker.internal")
 
 # Django-sendfile:
 # https://github.com/moggers87/django-sendfile2
