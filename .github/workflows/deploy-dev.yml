@@ -1,0 +1,31 @@
+name: Deploy on dev (self-hosted @172.16.0.172)
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    types: [ closed ]
+    branches: [ "dev" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    runs-on: [ self-hosted, dev ]
+    concurrency:
+      group: deploy-dev
+      cancel-in-progress: false
+
+    steps:
+      - name: Go to app directory
+        run: cd /home/bytesize/cvat/AutoLabelingTool && pwd
+
+      - name: Deploy commands
+        working-directory: /home/bytesize/cvat/AutoLabelingTool
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose down || true
+          git pull
+          docker compose -f docker-compose.yml -f docker-compose.build.yml build
+          docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
