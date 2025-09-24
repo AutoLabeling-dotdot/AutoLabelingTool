@@ -28,4 +28,5 @@ jobs:
           docker compose down || true
           git pull
           docker compose -f docker-compose.yml -f docker-compose.build.yml build
+          export CVAT_HOST=172.16.0.172
           docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
