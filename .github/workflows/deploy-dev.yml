@@ -17,18 +17,36 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - name: Go to app directory
-        run: cd /home/bytesize/cvat/AutoLabelingTool && pwd
+      - name: Clean checkout
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
 
-      - name: Clean reset and deploy
+          echo "🧹 Cleaning up previous deployment..."
+          cd /home/bytesize/cvat/
+          docker compose -f AutoLabelingTool/docker-compose.yml down || true
+          rm -rf AutoLabelingTool
+
+          echo "📥 Fresh checkout from GitHub..."
+          git clone https://oauth2:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git AutoLabelingTool
+          cd AutoLabelingTool
+          git checkout dev
+
+          echo "✅ Clean checkout completed!"
+
+      - name: Build and deploy
         working-directory: /home/bytesize/cvat/AutoLabelingTool
         shell: bash
         run: |
           set -euo pipefail
-          docker compose down || true
-          git reset --hard HEAD
-          git clean -fd
-          git pull
+
+          echo "🔨 Building Docker images..."
           docker compose -f docker-compose.yml -f docker-compose.build.yml build
+
+          echo "🚀 Starting services..."
           export CVAT_HOST=172.16.0.172
           docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
+
+          echo "✅ Deployment completed successfully!"
