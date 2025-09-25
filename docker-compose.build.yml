@@ -1,4 +1,10 @@
 services:
+  cvat_ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    image: cvat/ui:${CVAT_VERSION:-dev}
+
   cvat_server:
     build:
       context: .
