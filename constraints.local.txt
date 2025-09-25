@@ -1,3 +1,0 @@
-Cython<3
-numpy<2
-av==9.2.0
