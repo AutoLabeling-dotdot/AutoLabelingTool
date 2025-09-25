@@ -17,16 +17,17 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - name: Go to app directory
-        run: cd /home/bytesize/cvat/AutoLabelingTool && pwd
+    - name: Clean checkout
+      run: |
+        cd /home/bytesize/cvat/
+        rm -rf AutoLabelingTool
+        git clone -b dev https://github.com/your-repo/AutoLabelingTool.git
+        cd AutoLabelingTool
 
-      - name: Deploy commands
-        working-directory: /home/bytesize/cvat/AutoLabelingTool
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker compose down || true
-          git pull
-          docker compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache
-          export CVAT_HOST=172.16.0.172
-          docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
+    - name: Deploy
+      run: |
+        docker compose down || true
+        docker system prune -f
+        docker compose -f docker-compose.yml -f docker-compose.build.yml build
+        export CVAT_HOST=172.16.0.172
+        docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
