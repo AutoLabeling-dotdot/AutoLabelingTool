@@ -187,9 +187,9 @@ class ServerViewSet(viewsets.ViewSet):
     def about(request: ExtendedRequest):
         from cvat import __version__ as cvat_version
         about = {
-            "name": "Computer Vision Annotation Tool",
+            "name": "dotdot",
             "subtitle": settings.ABOUT_INFO["subtitle"],
-            "description": "CVAT is completely re-designed and re-implemented " +
+            "description": "dotdot is completely re-designed and re-implemented " +
                 "version of Video Annotation Tool from Irvine, California " +
                 "tool. It is free, online, interactive video and image annotation " +
                 "tool for computer vision. It is being used by our team to " +
