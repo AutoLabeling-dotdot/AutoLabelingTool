@@ -186,16 +186,17 @@ class ServerViewSet(viewsets.ViewSet):
     )
     def about(request: ExtendedRequest):
         from cvat import __version__ as cvat_version
+        description = (
+            "dotdot is an online, interactive video and image annotation tool for computer vision. "
+            "We built and operate this service by incorporating and/or customizing components from the open-source project "
+            "CVAT (Computer Vision Annotation Tool), which is licensed under the MIT License. "
+            "It is used by our team to annotate millions of objects with diverse properties. "
+            "Many UI and UX decisions are based on feedback from professional data-annotation teams."
+        )
         about = {
-            "name": "Computer Vision Annotation Tool",
+            "name": "dotdot",
             "subtitle": settings.ABOUT_INFO["subtitle"],
-            "description": "CVAT is completely re-designed and re-implemented " +
-                "version of Video Annotation Tool from Irvine, California " +
-                "tool. It is free, online, interactive video and image annotation " +
-                "tool for computer vision. It is being used by our team to " +
-                "annotate million of objects with different properties. Many UI " +
-                "and UX decisions are based on feedbacks from professional data " +
-                "annotation team.",
+            "description": description,
             "version": cvat_version,
             "logo_url": request.build_absolute_uri(storages["staticfiles"].url(settings.LOGO_FILENAME)),
         }

@@ -209,27 +209,27 @@ function HeaderComponent(props: Props): JSX.Element {
 
     const aboutPlugins = usePlugins((state: CombinedState) => state.plugins.components.about.links.items, props);
     const aboutLinks: [JSX.Element, number][] = [];
-    aboutLinks.push([(
-        <Col key='changelog'>
-            <a href={CHANGELOG_URL} target='_blank' rel='noopener noreferrer'>
-                What&apos;s new?
-            </a>
-        </Col>
-    ), 0]);
+    // aboutLinks.push([(
+    //     <Col key='changelog'>
+    //         <a href={CHANGELOG_URL} target='_blank' rel='noopener noreferrer'>
+    //             What&apos;s new?
+    //         </a>
+    //     </Col>
+    // ), 0]);
     aboutLinks.push([(
         <Col key='license'>
             <a href={LICENSE_URL} target='_blank' rel='noopener noreferrer'>
-                MIT License
+              Third-party Licenses Notice
             </a>
         </Col>
     ), 10]);
-    aboutLinks.push([(
-        <Col key='discord'>
-            <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
-                Find us on Discord
-            </a>
-        </Col>
-    ), 20]);
+    // aboutLinks.push([(
+    //     <Col key='discord'>
+    //         <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
+    //             Find us on Discord
+    //         </a>
+    //     </Col>
+    // ), 20]);
 
     aboutLinks.push(...aboutPlugins.map(({ component: Component, weight }, index: number) => (
         [<Component key={index} targetProps={props} />, weight] as [JSX.Element, number]
