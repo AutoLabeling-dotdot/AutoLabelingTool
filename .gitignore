@@ -79,3 +79,7 @@ cvat-ui/dist
 **/!.yarn/versions
 
 constraints.local.txt
+
+# ENV
+.env
+.env.local

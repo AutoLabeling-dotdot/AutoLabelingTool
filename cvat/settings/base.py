@@ -22,6 +22,7 @@ import tempfile
 import urllib
 from datetime import timedelta
 from enum import Enum, IntEnum
+from dotenv import load_dotenv
 
 from attr.converters import to_bool
 from corsheaders.defaults import default_headers
@@ -37,6 +38,9 @@ from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = str(Path(__file__).parents[2])
+
+# Load .env.local file for development environment
+load_dotenv(os.path.join(BASE_DIR, '.env.local'))
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 INTERNAL_IPS = ["127.0.0.1"]
@@ -761,7 +765,7 @@ SMOKESCREEN_ENABLED = True
 # By default, email backend is django.core.mail.backends.smtp.EmailBackend
 # But it won't work without additional configuration, so we set it to None
 # to check configuration and throw ImproperlyConfigured if thats a case
-EMAIL_BACKEND = None
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', None)
 
 ONE_RUNNING_JOB_IN_QUEUE_PER_USER = to_bool(os.getenv("ONE_RUNNING_JOB_IN_QUEUE_PER_USER", False))
 
