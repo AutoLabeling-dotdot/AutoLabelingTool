@@ -99,10 +99,7 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
-<<<<<<< HEAD
-=======
       CVAT_HOST: ${CVAT_HOST:-}
->>>>>>> 3ccd9062a (chore: CVAT_HOST 환경변수 추가)
     command: init run server
     labels:
       traefik.enable: 'true'
