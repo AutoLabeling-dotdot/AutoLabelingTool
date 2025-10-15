@@ -767,6 +767,14 @@ SMOKESCREEN_ENABLED = True
 # to check configuration and throw ImproperlyConfigured if thats a case
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', None)
 
+if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    EMAIL_HOST=os.getenv('EMAIL_HOST', 'localhost')
+    EMAIL_PORT=int(os.getenv('EMAIL_PORT', 25))
+    EMAIL_USE_TLS=to_bool(os.getenv('EMAIL_USE_TLS', False))
+    EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD=os.getenv('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL=os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
+
 ONE_RUNNING_JOB_IN_QUEUE_PER_USER = to_bool(os.getenv("ONE_RUNNING_JOB_IN_QUEUE_PER_USER", False))
 
 # How many chunks can be prepared simultaneously during task creation in case the cache is not used
