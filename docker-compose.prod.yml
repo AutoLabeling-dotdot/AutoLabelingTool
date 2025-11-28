@@ -43,8 +43,9 @@ services:
 
       # ClickHouse etc
       CVAT_ANALYTICS: 0
-      ENV_SMOKESCREEN_OPTS: ""
-
+      SMOKESCREEN_OPTS: ""
+    ports:
+      - "8081:8080"  # 내부 네트워크용 포트
     command: init run server
 
     volumes:
