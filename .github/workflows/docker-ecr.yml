@@ -30,31 +30,31 @@ jobs:
       # Step 4: Build server image
       - name: Build Server Image
         run: |
-          docker build -t cvat-server:dotdot-v1 -f Dockerfile .
+          docker build -t cvat-server:prod -f Dockerfile .
 
       # Step 5: Tag server image
       - name: Tag Server Image
         run: |
-          docker tag cvat-server:dotdot-v1 \
-            ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-server:dotdot-v1
+          docker tag cvat-server:prod \
+            ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-server:prod
 
       # Step 6: Push server image
       - name: Push Server Image
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-server:dotdot-v1
+          docker push ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-server:prod
 
       # Step 7: Build UI image
       - name: Build UI Image
         run: |
-          docker build -t cvat-ui:dotdot-v1 -f Dockerfile.ui .
+          docker build -t cvat-ui:prod -f Dockerfile.ui .
 
       # Step 8: Tag UI image
       - name: Tag UI Image
         run: |
-          docker tag cvat-ui:dotdot-v1 \
-            ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-ui:dotdot-v1
+          docker tag cvat-ui:prod \
+            ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-ui:prod
 
       # Step 9: Push UI image
       - name: Push UI Image
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-ui:dotdot-v1
+          docker push ${{ steps.login-ecr.outputs.registry }}/bytesize/cvat-dotdot-ui:prod

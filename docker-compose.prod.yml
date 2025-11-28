@@ -5,7 +5,7 @@ services:
   cvat_redis_inmem:
     image: redis:7.2-alpine
     restart: always
-    command: ["redis-server"]
+    command: ["redis-server", "--save", "60", "100", "--appendonly", "yes"]
     networks: [cvat]
 
   cvat_redis_ondisk:
@@ -15,7 +15,7 @@ services:
     networks: [cvat]
 
   cvat_server:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_server
     restart: always
     depends_on:
@@ -26,7 +26,7 @@ services:
       CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
       CVAT_POSTGRES_PORT: 5432
       CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
       CVAT_POSTGRES_DB: cvat
 
       # Redis
@@ -37,9 +37,12 @@ services:
 
       # Server Config
       ALLOWED_HOSTS: "*"
-      CVAT_BASE_URL: ""
-      CVAT_HOST: ""
+      CVAT_BASE_URL:  ${CVAT_BASE_URL}
+      CVAT_HOST: ${CVAT_HOST}
       NUMPROCS: 2
+
+      # ClickHouse etc
+      CVAT_ANALYTICS: 0
 
     command: init run server
 
@@ -52,15 +55,15 @@ services:
       - cvat
 
   cvat_ui:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-ui
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-ui:prod
     container_name: cvat_ui
     restart: always
     depends_on:
       - cvat_server
     environment:
-      CVAT_HOST: ""
+      CVAT_HOST: ${CVAT_HOST}
     ports:
-      - "8080:8080" # ALB가 바라볼 포트
+      - "8080:8000" # ALB가 바라볼 포트
     networks:
       - cvat
 
