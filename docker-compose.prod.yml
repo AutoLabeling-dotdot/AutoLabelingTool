@@ -43,6 +43,7 @@ services:
 
       # ClickHouse etc
       CVAT_ANALYTICS: 0
+      ENV_SMOKESCREEN_OPTS: ""
 
     command: init run server
 
