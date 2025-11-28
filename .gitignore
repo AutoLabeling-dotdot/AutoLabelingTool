@@ -83,3 +83,8 @@ constraints.local.txt
 # ENV
 .env
 .env.local
+.env.production
+
+# AWS
+aws/
+awscliv2.zip

@@ -1,0 +1,85 @@
+version: '3.8'
+name: cvat-dotdot-production
+
+services:
+  cvat_redis_inmem:
+    image: redis:7.2-alpine
+    restart: always
+    command: ["redis-server"]
+    networks: [cvat]
+
+  cvat_redis_ondisk:
+    image: apache/kvrocks:2.12.1
+    restart: always
+    command: ['--compact-cron', '0 3 * * *']
+    networks: [cvat]
+
+  cvat_server:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server
+    container_name: cvat_server
+    restart: always
+    depends_on:
+      - cvat_redis_inmem
+      - cvat_redis_ondisk
+    environment:
+      # RDS INFO
+      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
+      CVAT_POSTGRES_PORT: 5432
+      CVAT_POSTGRES_USER: dotdotadmin
+      CVAT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      CVAT_POSTGRES_DB: cvat
+
+      # Redis
+      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
+      CVAT_REDIS_INMEM_PORT: 6379
+      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
+      CVAT_REDIS_ONDISK_PORT: 6666
+
+      # Server Config
+      ALLOWED_HOSTS: "*"
+      CVAT_BASE_URL: ""
+      CVAT_HOST: ""
+      NUMPROCS: 2
+
+    command: init run server
+
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+    networks:
+      - cvat
+
+  cvat_ui:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-ui
+    container_name: cvat_ui
+    restart: always
+    depends_on:
+      - cvat_server
+    environment:
+      CVAT_HOST: ""
+    ports:
+      - "8080:8080" # ALB가 바라볼 포트
+    networks:
+      - cvat
+
+  # 나중에 Prometheus 연동
+  grafana:
+    image: grafana/grafana-oss:10.1.2
+    container_name: cvat_grafana
+    restart: always
+    ports:
+      - "3000:3000" # 필요하면 ALB로 노출 가능
+    environment:
+      GF_AUTH_BASIC_ENABLED: true
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    volumes:
+      - /data/cvat/grafana:/var/lib/grafana
+    networks:
+      - cvat
+
+networks:
+  cvat:
+    driver: bridge
