@@ -1,22 +1,79 @@
 version: '3.8'
 name: cvat-dotdot-production
 
+x-backend-deps: &backend-deps
+  cvat_redis_inmem:
+    condition: service_started
+  cvat_redis_ondisk:
+    condition: service_started
+
+x-backend-env: &backend-env
+  CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
+  CVAT_POSTGRES_PORT: 5432
+  CVAT_POSTGRES_USER: dotdotadmin
+  CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
+  CVAT_POSTGRES_DB: cvat
+  CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
+  CVAT_REDIS_INMEM_PORT: 6379
+  CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
+  CVAT_REDIS_ONDISK_PORT: 6666
+  CVAT_LOG_IMPORT_ERRORS: 'true'
+  CVAT_ALLOW_STATIC_CACHE: '${CVAT_ALLOW_STATIC_CACHE:-no}'
+  SMOKESCREEN_OPTS: ${SMOKESCREEN_OPTS:-}
+
 services:
+  cvat_server:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
+    container_name: cvat_server
+    restart: always
+    depends_on:
+      <<: *backend-deps
+      cvat_opa:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      # Server Config
+      ALLOWED_HOSTS: "*"
+      CVAT_BASE_URL:  ${CVAT_BASE_URL}
+      CVAT_HOST: ${CVAT_HOST}
+      NUMPROCS: 2
+
+      # IAM/OPA
+      IAM_OPA_BUNDLE: "1"
+
+      # ClickHouse etc
+      CVAT_ANALYTICS: 0
+    ports:
+      - "8081:8080"  # 내부 네트워크용 포트
+    command: init run server
+
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+    networks:
+      cvat:
+        aliases:
+          - cvat-server
+
   cvat_redis_inmem:
     image: redis:7.2-alpine
+    container_name: cvat_redis_inmem
     restart: always
     command: ["redis-server", "--save", "60", "100", "--appendonly", "yes"]
     volumes:
-      - /data/cvat/inmem:/data
+      - cvat_inmem_db:/data
     networks: [cvat]
 
   cvat_redis_ondisk:
     image: apache/kvrocks:2.12.1
+    container_name: cvat_redis_ondisk
     restart: always
     init: true
     command: ['--compact-cron', '0 3 * * *']
     volumes:
-      - /data/cvat/cache:/var/lib/kvrocks
+      - cvat_cache_db:/var/lib/kvrocks
     networks: [cvat]
 
   cvat_opa:
@@ -30,80 +87,20 @@ services:
       - run
       - --server
       - --log-level=error
-      - --set=services.cvat.url=http://cvat_server:8080
+      - --set=services.cvat.url=http://cvat-server:8080
       - --set=bundles.cvat.service=cvat
       - --set=bundles.cvat.resource=/api/auth/rules
       - --set=bundles.cvat.polling.min_delay_seconds=5
       - --set=bundles.cvat.polling.max_delay_seconds=15
 
-  cvat_server:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
-    container_name: cvat_server
-    restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
-      - cvat_opa
-    environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
-      # Server Config
-      ALLOWED_HOSTS: "*"
-      CVAT_BASE_URL:  ${CVAT_BASE_URL}
-      CVAT_HOST: ${CVAT_HOST}
-      NUMPROCS: 2
-
-      # IAM/OPA
-      IAM_OPA_BUNDLE: "1"
-
-      # ClickHouse etc
-      CVAT_ANALYTICS: 0
-      SMOKESCREEN_OPTS: ""
-    ports:
-      - "8081:8080"  # 내부 네트워크용 포트
-    command: init run server
-
-    volumes:
-      - /data/cvat/data:/home/django/data
-      - /data/cvat/keys:/home/django/keys
-      - /data/cvat/logs:/home/django/logs
-
-    networks:
-      - cvat
-
   cvat_worker_utils:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_utils
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_INMEM_PASSWORD: ""
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
+      CVAT_REDIS_INMEM_PASSWORD: ''
       # Worker Config
       NUMPROCS: 1
     command: run worker notifications cleaning
@@ -118,23 +115,9 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_import
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 2
     command: run worker import
@@ -149,23 +132,9 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_export
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 2
     command: run worker export
@@ -180,23 +149,9 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_annotation
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 1
     command: run worker annotation
@@ -211,23 +166,9 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_webhooks
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 1
     command: run worker webhooks
@@ -242,23 +183,9 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_quality_reports
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 1
     command: run worker quality_reports
@@ -273,23 +200,9 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/cvat-dotdot-server:prod
     container_name: cvat_worker_chunks
     restart: always
-    depends_on:
-      - cvat_redis_inmem
-      - cvat_redis_ondisk
+    depends_on: *backend-deps
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 2
     command: run worker chunks
@@ -308,19 +221,7 @@ services:
       - cvat_redis_inmem
       - cvat_redis_ondisk
     environment:
-      # RDS INFO
-      CVAT_POSTGRES_HOST: database-cvat-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
-      CVAT_POSTGRES_PORT: 5432
-      CVAT_POSTGRES_USER: dotdotadmin
-      CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
-      CVAT_POSTGRES_DB: cvat
-
-      # Redis
-      CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
-      CVAT_REDIS_INMEM_PORT: 6379
-      CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
-      CVAT_REDIS_ONDISK_PORT: 6666
-
+      <<: *backend-env
       # Worker Config
       NUMPROCS: 1
     command: run worker consensus
@@ -359,6 +260,10 @@ services:
       - /data/cvat/grafana:/var/lib/grafana
     networks:
       - cvat
+
+volumes:
+  cvat_inmem_db:
+  cvat_cache_db:
 
 networks:
   cvat:
