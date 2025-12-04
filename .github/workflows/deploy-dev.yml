@@ -2,10 +2,10 @@ name: Deploy on dev (self-hosted @172.16.0.172)
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "develop" ]
   pull_request:
     types: [ closed ]
-    branches: [ "dev" ]
+    branches: [ "develop" ]
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
     runs-on: [ self-hosted, dev ]
     concurrency:
-      group: deploy-dev
+      group: deploy-develop
       cancel-in-progress: false
 
     steps:
