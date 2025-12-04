@@ -46,7 +46,9 @@ jobs:
       # Step 7: Build UI image
       - name: Build UI Image
         run: |
-          docker build --no-cache -t cvat-ui:prod -f Dockerfile.ui .
+          docker build --no-cache \
+            --build-arg NGINX_CONF=react_nginx.prod.conf \
+            -t cvat-ui:prod -f Dockerfile.ui .
 
       # Step 8: Tag UI image
       - name: Tag UI Image
