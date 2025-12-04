@@ -25,10 +25,24 @@ from cvat.apps.iam.permissions import (
 )
 from cvat.apps.organizations.models import Organization
 
-from .models import AnnotationGuide, CloudStorage, Comment, Issue, Job, Label, Project, Task, User
+from .location import StorageType, get_location_configuration
+from .models import (
+    AnnotationGuide,
+    CloudStorage,
+    Comment,
+    Issue,
+    Job,
+    Label,
+    Location,
+    Project,
+    Task,
+    User,
+)
 
 if TYPE_CHECKING:
     from rest_framework.viewsets import ViewSet
+
+    from cvat.apps.iam.permissions import IamContext
 
 def _get_key(d: dict[str, Any], key_path: Union[str, Sequence[str]]) -> Optional[Any]:
     """
@@ -73,6 +87,26 @@ class DownloadExportedExtension:
                 "id": self.rq_job_id.user_id if self.rq_job_id else None
             }
         }
+
+class ExportableResourceExtension:
+    location: Location
+
+    @classmethod
+    def update_scope_params(
+        cls: type[OpenPolicyAgentPermission],
+        scope_params: dict[str, Any],
+        *,
+        request: ExtendedRequest,
+        db_instance: Project | Task | Job
+    ):
+        location_configuration = get_location_configuration(
+            request.query_params, field_name=StorageType.TARGET, db_instance=db_instance
+        )
+        scope_params['location'] = location_configuration.location
+
+    def update_resource_data(self, resource_data: dict[str, Any]):
+        resource_data["destination"] = self.location
+
 
 class ServerPermission(OpenPolicyAgentPermission):
     class Scopes(StrEnum):
@@ -231,7 +265,9 @@ class CloudStoragePermission(OpenPolicyAgentPermission):
 
         return data
 
-class ProjectPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
+class ProjectPermission(
+    OpenPolicyAgentPermission, DownloadExportedExtension, ExportableResourceExtension
+):
     obj: Optional[Project]
 
     class Scopes(StrEnum):
@@ -255,6 +291,7 @@ class ProjectPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
     def create(cls, request: ExtendedRequest, view: ViewSet, obj: Project | None, iam_context: dict[str, Any]) -> list[OpenPolicyAgentPermission]:
         permissions = []
         assignee_id = request.data.get('assignee_id') or request.data.get('assignee')
+        owner_id = request.data.get('owner_id') or request.data.get('owner')
 
         scopes = cls.get_scopes(request, view, obj)
 
@@ -279,18 +316,20 @@ class ProjectPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
             scopes.remove(cls.Scopes.UPDATE_ORGANIZATION)
 
         for scope in scopes:
-            scope_params = {}
+            params = { 'assignee_id': assignee_id }
+            if scope == cls.Scopes.UPDATE_OWNER:
+                params['owner_id'] = owner_id
 
-            if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
-                cls.extend_params_with_rq_job_details(request=request, params=scope_params)
+            params.update(cls.get_scope_specific_params(
+                scope=scope, request=request, view=view, obj=obj, iam_context=iam_context
+            ))
 
-            self = cls.create_base_perm(request, view, scope, iam_context, obj,
-                assignee_id=assignee_id, **scope_params)
+            self = cls.create_base_perm(request, view, scope, iam_context, obj, **params)
             permissions.append(self)
 
-        owner = request.data.get('owner_id') or request.data.get('owner')
-        if owner:
-            perm = UserPermission.create_scope_view(iam_context, owner)
+
+        if owner_id:
+            perm = UserPermission.create_scope_view(iam_context, owner_id)
             permissions.append(perm)
 
         if assignee_id:
@@ -395,6 +434,34 @@ class ProjectPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
             org_role=getattr(membership, 'role', None),
             scope=cls.Scopes.CREATE)
 
+    @classmethod
+    def get_scope_specific_params(
+        cls,
+        scope: Scopes,
+        *,
+        request: ExtendedRequest,
+        view: ViewSet,
+        obj: Project | None,
+        iam_context: IamContext | None
+    ):
+        params = {}
+
+        if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
+            DownloadExportedExtension.extend_params_with_rq_job_details(
+                request=request, params=params
+            )
+
+        if scope in (
+            cls.Scopes.EXPORT_ANNOTATIONS,
+            cls.Scopes.EXPORT_BACKUP,
+            cls.Scopes.EXPORT_DATASET,
+        ) and obj:
+            ExportableResourceExtension.update_scope_params.__func__(
+                cls, params, request=request, db_instance=obj
+            )
+
+        return params
+
     def get_resource(self):
         data = None
         if self.obj:
@@ -407,6 +474,13 @@ class ProjectPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
 
             if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == self.scope:
                 self.extend_resource_with_rq_job_details(data)
+
+            if self.scope in (
+                self.Scopes.EXPORT_ANNOTATIONS,
+                self.Scopes.EXPORT_BACKUP,
+                self.Scopes.EXPORT_DATASET,
+            ):
+                ExportableResourceExtension.update_resource_data(self, data)
 
         elif self.scope in [self.Scopes.CREATE, self.Scopes.IMPORT_BACKUP]:
             data = {
@@ -422,7 +496,9 @@ class ProjectPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
 
         return data
 
-class TaskPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
+class TaskPermission(
+    OpenPolicyAgentPermission, DownloadExportedExtension, ExportableResourceExtension
+):
     obj: Optional[Task]
 
     class Scopes(StrEnum):
@@ -458,7 +534,7 @@ class TaskPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
         permissions = []
         project_id = request.data.get('project_id') or request.data.get('project')
         assignee_id = request.data.get('assignee_id') or request.data.get('assignee')
-        owner = request.data.get('owner_id') or request.data.get('owner')
+        owner_id = request.data.get('owner_id') or request.data.get('owner')
 
         scopes = cls.get_scopes(request, view, obj)
 
@@ -486,16 +562,17 @@ class TaskPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
             params = { 'project_id': project_id, 'assignee_id': assignee_id }
 
             if scope == cls.Scopes.UPDATE_OWNER:
-                params['owner_id'] = owner
+                params['owner_id'] = owner_id
 
-            if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
-                cls.extend_params_with_rq_job_details(request=request, params=params)
+            params.update(cls.get_scope_specific_params(
+                scope=scope, request=request, view=view, obj=obj, iam_context=iam_context
+            ))
 
             self = cls.create_base_perm(request, view, scope, iam_context, obj, **params)
             permissions.append(self)
 
-        if owner:
-            perm = UserPermission.create_scope_view(iam_context, owner)
+        if owner_id:
+            perm = UserPermission.create_scope_view(iam_context, owner_id)
             permissions.append(perm)
 
         if assignee_id:
@@ -620,6 +697,34 @@ class TaskPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
         return scopes
 
     @classmethod
+    def get_scope_specific_params(
+        cls,
+        scope: Scopes,
+        *,
+        request: ExtendedRequest,
+        view: ViewSet,
+        obj: Task | None,
+        iam_context: IamContext | None
+    ):
+        params = {}
+
+        if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
+            DownloadExportedExtension.extend_params_with_rq_job_details(
+                request=request, params=params
+            )
+
+        if scope in (
+            cls.Scopes.EXPORT_ANNOTATIONS,
+            cls.Scopes.EXPORT_BACKUP,
+            cls.Scopes.EXPORT_DATASET,
+        ) and obj:
+            ExportableResourceExtension.update_scope_params.__func__(
+                cls, params, request=request, db_instance=obj
+            )
+
+        return params
+
+    @classmethod
     def create_scope_view_data(cls, iam_context: dict[str, Any], task_id: int):
         try:
             obj = Task.objects.get(id=task_id)
@@ -644,6 +749,13 @@ class TaskPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
 
             if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == self.scope:
                 self.extend_resource_with_rq_job_details(data)
+
+            if self.scope in (
+                self.Scopes.EXPORT_ANNOTATIONS,
+                self.Scopes.EXPORT_BACKUP,
+                self.Scopes.EXPORT_DATASET,
+            ):
+                ExportableResourceExtension.update_resource_data(self, data)
 
         elif self.scope in [
             self.Scopes.CREATE,
@@ -723,8 +835,9 @@ class JobPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
                         request, task, iam_context=iam_context
                     ))
 
-            if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
-                cls.extend_params_with_rq_job_details(request=request, params=scope_params)
+            scope_params.update(cls.get_scope_specific_params(
+                scope=scope, request=request, view=view, obj=obj, iam_context=iam_context
+            ))
 
             self = cls.create_base_perm(request, view, scope, iam_context, obj, **scope_params)
             permissions.append(self)
@@ -821,6 +934,30 @@ class JobPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
 
         return scopes
 
+    @classmethod
+    def get_scope_specific_params(
+        cls,
+        scope: Scopes,
+        *,
+        request: ExtendedRequest,
+        view: ViewSet,
+        obj: Job | None,
+        iam_context: IamContext | None
+    ):
+        params = {}
+
+        if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
+            DownloadExportedExtension.extend_params_with_rq_job_details(
+                request=request, params=params
+            )
+
+        if scope in (cls.Scopes.EXPORT_ANNOTATIONS, cls.Scopes.EXPORT_DATASET):
+            ExportableResourceExtension.update_scope_params.__func__(
+                cls, params, request=request, db_instance=obj
+            )
+
+        return params
+
     def get_resource(self):
         data = None
         if self.obj:
@@ -845,6 +982,9 @@ class JobPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
 
             if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == self.scope:
                 self.extend_resource_with_rq_job_details(data)
+
+            if self.scope in (self.Scopes.EXPORT_ANNOTATIONS, self.Scopes.EXPORT_DATASET):
+                ExportableResourceExtension.update_resource_data(self, data)
 
         elif self.scope == self.Scopes.CREATE:
             if self.task_id is None:

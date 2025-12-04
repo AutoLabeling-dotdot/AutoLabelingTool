@@ -43,6 +43,7 @@ jobs:
           set -euo pipefail
 
           echo "🔨 Building Docker images..."
+          export NGINX_CONF=react_nginx.conf
           docker compose -f docker-compose.yml -f docker-compose.build.yml build
 
           echo "🚀 Starting services..."

@@ -6,10 +6,11 @@
 import io
 import itertools
 from collections import OrderedDict, defaultdict
+from collections.abc import Callable
 from contextlib import nullcontext
 from copy import deepcopy
 from enum import Enum
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
 from datumaro.components.errors import DatasetError, DatasetImportError, DatasetNotFoundError
 from django.conf import settings
@@ -870,9 +871,11 @@ class TaskAnnotation:
         if self.db_task.data.validation_mode == models.ValidationMode.GT_POOL:
             requested_job_types.append(models.JobType.GROUND_TRUTH)
 
-        self.db_jobs = JobAnnotation.add_prefetch_info(
-            models.Job.objects, prefetch_images=False
-        ).filter(segment__task_id=pk, type__in=requested_job_types)
+        self.db_jobs = (
+            JobAnnotation.add_prefetch_info(models.Job.objects, prefetch_images=False)
+            .filter(segment__task_id=pk, type__in=requested_job_types)
+            .order_by("id")
+        )
 
         if not write_only:
             self.ir_data = AnnotationIR(self.db_task.dimension)

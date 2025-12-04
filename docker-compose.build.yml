@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ui
+      args:
+        NGINX_CONF: ${NGINX_CONF}
     image: cvat/ui:${CVAT_VERSION:-dev}
 
   cvat_server:

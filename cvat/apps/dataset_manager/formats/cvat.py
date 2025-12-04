@@ -7,9 +7,10 @@ import os
 import os.path as osp
 import zipfile
 from collections import OrderedDict
+from collections.abc import Callable
 from glob import glob
 from io import BufferedWriter
-from typing import Callable, Union
+from typing import Union
 
 from datumaro.components.annotation import (
     AnnotationType,
@@ -30,7 +31,6 @@ from defusedxml import ElementTree
 
 from cvat.apps.dataset_manager.bindings import (
     CommonData,
-    CVATProjectDataExtractor,
     JobData,
     NoMediaInAnnotationFileError,
     ProjectData,
@@ -41,7 +41,8 @@ from cvat.apps.dataset_manager.bindings import (
     match_dm_item,
 )
 from cvat.apps.dataset_manager.util import make_zip_archive
-from cvat.apps.engine.frame_provider import FrameOutputType, FrameQuality, make_frame_provider
+from cvat.apps.engine.frame_provider import FrameOutputType, make_frame_provider
+from cvat.apps.engine.models import FrameQuality
 
 from .registry import dm_env, exporter, importer
 
@@ -851,12 +852,6 @@ def dump_as_cvat_annotation(dumper, annotations: JobData | TaskData | ProjectDat
                 [("width", str(frame_annotation.width)), ("height", str(frame_annotation.height))]
             )
         )
-
-        # do not keep parsed lazy list data after this iteration
-        if isinstance(annotations, ProjectData):
-            frame_annotation = CVATProjectDataExtractor.copy_frame_data_with_replaced_lazy_lists(
-                frame_annotation
-            )
 
         dumper.open_image(image_attrs)
 
