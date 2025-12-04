@@ -7,7 +7,7 @@
 
 /* eslint-disable security/detect-non-literal-regexp */
 
-import { decomposeMatrix, convertClasses } from './utils';
+import { decomposeMatrix, convertClasses, toSnakeCase } from './utils';
 
 require('cypress-file-upload');
 require('../plugins/imageGenerator/imageGeneratorCommand');
@@ -32,6 +32,11 @@ Cypress.Commands.add('login', (username = Cypress.env('user'), password = Cypres
     });
 });
 
+Cypress.Commands.add('prepareUserSession', (nextURL = '/tasks') => {
+    cy.visit('/auth/login');
+    cy.headlessLogin({ nextURL });
+});
+
 Cypress.Commands.add('logout', () => {
     cy.get('.cvat-header-menu-user-dropdown-user').click();
     cy.get('span[aria-label="logout"]').click();
@@ -54,25 +59,10 @@ Cypress.Commands.add('userRegistration', (firstName, lastName, userName, emailAd
     }
 });
 
-Cypress.Commands.add('getAuthKey', () => {
-    cy.request({
-        method: 'POST',
-        url: '/api/auth/login',
-        body: {
-            username: Cypress.env('user'),
-            email: Cypress.env('email'),
-            password: Cypress.env('password'),
-        },
-    });
-});
-
-Cypress.Commands.add('deleteUsers', (authResponse, accountsToDelete) => {
-    const authKey = authResponse.body.key;
+Cypress.Commands.add('deleteUsers', (authHeaders, accountsToDelete) => {
     cy.request({
         url: '/api/users?page_size=all',
-        headers: {
-            Authorization: `Token ${authKey}`,
-        },
+        headers: authHeaders,
     }).then((_response) => {
         const responseResult = _response.body.results;
         for (const user of responseResult) {
@@ -82,9 +72,7 @@ Cypress.Commands.add('deleteUsers', (authResponse, accountsToDelete) => {
                     cy.request({
                         method: 'DELETE',
                         url: `/api/users/${id}`,
-                        headers: {
-                            Authorization: `Token ${authKey}`,
-                        },
+                        headers: authHeaders,
                     });
                 }
             }
@@ -103,58 +91,34 @@ Cypress.Commands.add('headlessDeleteUser', (userId) => {
     cy.wait('@deleteUser');
 });
 
-Cypress.Commands.add('changeUserActiveStatus', (authKey, accountsToChangeActiveStatus, isActive) => {
-    cy.request({
-        url: '/api/users?page_size=all',
-        headers: {
-            Authorization: `Token ${authKey}`,
-        },
-    }).then((response) => {
-        const responseResult = response.body.results;
-        responseResult.forEach((user) => {
-            const userId = user.id;
-            const userName = user.username;
-            if (userName.includes(accountsToChangeActiveStatus)) {
-                cy.request({
-                    method: 'PATCH',
-                    url: `/api/users/${userId}`,
-                    headers: {
-                        Authorization: `Token ${authKey}`,
-                    },
-                    body: {
-                        is_active: isActive,
-                    },
-                });
-            }
-        });
+Cypress.Commands.add('headlessDeleteUserByUsername', (username) => {
+    cy.headlessGetUserId(username).then((id) => {
+        cy.headlessDeleteUser(id);
     });
 });
 
-Cypress.Commands.add('checkUserStatuses', (authKey, userName, staffStatus, superuserStatus, activeStatus) => {
-    cy.request({
-        url: '/api/users?page_size=all',
-        headers: {
-            Authorization: `Token ${authKey}`,
-        },
-    }).then((response) => {
-        const responseResult = response.body.results;
-        responseResult.forEach((user) => {
-            if (user.username.includes(userName)) {
-                expect(staffStatus).to.be.equal(user.is_staff);
-                expect(superuserStatus).to.be.equal(user.is_superuser);
-                expect(activeStatus).to.be.equal(user.is_active);
-            }
-        });
-    });
-});
+Cypress.Commands.add('headlessGetSelfId', () => cy.window()
+    .its('cvat').should('not.be.undefined')
+    .then(async (cvat) => {
+        const { data: { id } } = await cvat.server.request('/api/users/self', { method: 'GET' });
+        return id;
+    }),
+);
 
-Cypress.Commands.add('deleteTasks', (authResponse, tasksToDelete) => {
-    const authKey = authResponse.body.key;
+Cypress.Commands.add('headlessGetUserId', (username) => cy.window().its('cvat')
+    .should('not.be.undefined')
+    .then(async (cvat) => {
+        const { data: { results: [{ id }] } } = await cvat.server.request(
+            `/api/users?filter={"==":[{"var":"username"}, "${username}"]}`,
+            { method: 'GET' },
+        );
+        return id;
+    }));
+
+Cypress.Commands.add('deleteTasks', (authHeaders, tasksToDelete) => {
     cy.request({
         url: '/api/tasks?page_size=all',
-        headers: {
-            Authorization: `Token ${authKey}`,
-        },
+        headers: authHeaders,
     }).then((_response) => {
         const responseResult = _response.body.results;
         for (const task of responseResult) {
@@ -164,9 +128,7 @@ Cypress.Commands.add('deleteTasks', (authResponse, tasksToDelete) => {
                     cy.request({
                         method: 'DELETE',
                         url: `/api/tasks/${id}`,
-                        headers: {
-                            Authorization: `Token ${authKey}`,
-                        },
+                        headers: authHeaders,
                     });
                 }
             }
@@ -181,7 +143,7 @@ Cypress.Commands.add(
         labelName = 'Some label',
         attrName = 'Some attr name',
         textDefaultValue = 'Some default value for type Text',
-        image = 'image.png',
+        fileName = 'image.png',
         multiAttrParams = null,
         advancedConfigurationParams = null,
         forProject = false,
@@ -190,6 +152,7 @@ Cypress.Commands.add(
         expectedResult = 'success',
         projectSubsetFieldValue = 'Test',
         qualityConfigurationParams = null,
+        fromShare = false,
     ) => {
         cy.url().then(() => {
             cy.get('.cvat-create-task-dropdown').click();
@@ -223,7 +186,11 @@ Cypress.Commands.add(
                 cy.get('.cvat-project-subset-field').type(`${projectSubsetFieldValue}{Enter}`);
                 cy.get('.cvat-constructor-viewer-new-item').should('not.exist');
             }
-            cy.get('input[type="file"]').attachFile(image, { subjectType: 'drag-n-drop' });
+            if (fromShare) {
+                cy.selectFilesFromShare([fileName]);
+            } else {
+                cy.get('input[type="file"]').attachFile(fileName, { subjectType: 'drag-n-drop' });
+            }
             if (advancedConfigurationParams) {
                 cy.advancedConfiguration(advancedConfigurationParams);
             }
@@ -278,7 +245,7 @@ Cypress.Commands.add('selectFilesFromShare', (serverFiles) => {
 Cypress.Commands.add('headlessLogin', ({
     username,
     password,
-    nextURL,
+    nextURL = null,
 } = {}) => {
     cy.window().its('cvat', { timeout: 25000 }).should('not.be.undefined');
     return cy.window().then((win) => (
@@ -372,8 +339,8 @@ Cypress.Commands.add('headlessRestoreAllFrames', (jobID) => {
 });
 
 Cypress.Commands.add('headlessCreateTask', (taskSpec, dataSpec, extras) => {
-    cy.window().then(async ($win) => {
-        const task = new $win.cvat.classes.Task({
+    cy.window().its('cvat').should('not.be.undefined').then(async (cvat) => {
+        const task = new cvat.classes.Task({
             ...taskSpec,
             ...dataSpec,
         });
@@ -396,8 +363,8 @@ Cypress.Commands.add('headlessCreateTask', (taskSpec, dataSpec, extras) => {
 });
 
 Cypress.Commands.add('headlessCreateProject', (projectSpec) => {
-    cy.window().then(async ($win) => {
-        const project = new $win.cvat.classes.Project({
+    cy.window().its('cvat').should('not.be.undefined').then(async (cvat) => {
+        const project = new cvat.classes.Project({
             ...projectSpec,
         });
 
@@ -420,13 +387,16 @@ Cypress.Commands.add('headlessDeleteTask', (taskID) => {
 });
 
 Cypress.Commands.add('headlessCreateUser', (userSpec) => {
+    const userSpecSnake = toSnakeCase(userSpec);
     cy.window().its('cvat', { timeout: 25000 }).should('not.be.undefined');
     cy.intercept('POST', '/api/auth/register**', (req) => {
         req.continue((response) => {
             delete response.headers['set-cookie'];
-            expect(response.statusCode).to.eq(201);
-            expect(response.body.username).to.eq(userSpec.username);
-            expect(response.body.email).to.eq(userSpec.email);
+            expect(response.statusCode).to.eq(201, response.body.username);
+            expect(response.body.username).to.eq(userSpecSnake.username);
+            expect(response.body.email).to.eq(userSpecSnake.email);
+            expect(response.body.first_name).to.eq(userSpecSnake.first_name);
+            expect(response.body.last_name).to.eq(userSpecSnake.last_name);
         });
     }).as('registerRequest');
 
@@ -1545,8 +1515,10 @@ Cypress.Commands.add('verifyNotification', () => {
 });
 
 Cypress.Commands.add('goToCloudStoragesPage', () => {
+    cy.intercept('GET', '/api/cloudstorages?**').as('getCloudStorages');
     cy.get('a[value="cloudstorages"]').click();
     cy.url().should('include', '/cloudstorages');
+    cy.wait('@getCloudStorages');
 });
 
 Cypress.Commands.add('deleteCloudStorage', (displayName) => {
@@ -1556,7 +1528,7 @@ Cypress.Commands.add('deleteCloudStorage', (displayName) => {
         .within(() => {
             cy.contains('[role="menuitem"]', 'Delete').click();
         });
-    cy.get('.cvat-delete-cloud-storage-modal')
+    cy.get('.cvat-modal-confirm-delete-cloud-storage')
         .should('contain', `You are going to remove the cloudstorage "${displayName}"`)
         .within(() => {
             cy.contains('button', 'Delete').click();
@@ -1908,7 +1880,10 @@ Cypress.Commands.add('mergeConsensusJob', (jobID, status = 202) => {
         .filter(`:contains("Job #${jobID}")`)
         .find('.anticon-more').first().click();
 
-    cy.get('.ant-dropdown-menu').contains('li', 'Merge consensus job').click();
+    cy.get('.ant-dropdown-menu')
+        .should('exist').and('be.visible')
+        .contains('li', 'Merge consensus job')
+        .click();
     cy.get('.cvat-modal-confirm-consensus-merge-job')
         .contains('button', 'Merge')
         .click();

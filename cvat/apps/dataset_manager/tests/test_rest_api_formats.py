@@ -12,6 +12,7 @@ import os.path as osp
 import random
 import xml.etree.ElementTree as ET
 import zipfile
+from collections.abc import Callable
 from contextlib import ExitStack, contextmanager
 from datetime import timedelta
 from functools import partial
@@ -19,7 +20,7 @@ from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import sleep
-from typing import Any, Callable, ClassVar, Optional, overload
+from typing import Any, ClassVar, Optional, overload
 from unittest.mock import DEFAULT as MOCK_DEFAULT
 from unittest.mock import MagicMock, patch
 
@@ -33,7 +34,7 @@ from PIL import Image
 from rest_framework import status
 
 import cvat.apps.dataset_manager as dm
-from cvat.apps.dataset_manager.bindings import CvatTaskOrJobDataExtractor, TaskData
+from cvat.apps.dataset_manager.bindings import CvatDataExtractor, TaskData
 from cvat.apps.dataset_manager.cron import clear_export_cache
 from cvat.apps.dataset_manager.task import TaskAnnotation
 from cvat.apps.dataset_manager.tests.utils import (
@@ -262,7 +263,7 @@ class _DbTestBase(ExportApiTestBase, ImportApiTestBase):
         task_ann = TaskAnnotation(task_id)
         task_ann.init_from_db()
         task_data = TaskData(task_ann.ir_data, Task.objects.get(pk=task_id))
-        extractor = CvatTaskOrJobDataExtractor(task_data, include_images=include_images)
+        extractor = CvatDataExtractor(task_data, include_images=include_images)
         return Dataset.from_extractors(extractor)
 
     def _delete_request(self, path, user):
