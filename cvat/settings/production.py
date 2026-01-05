@@ -5,6 +5,10 @@
 # Inherit parent config
 from .base import *  # pylint: disable=wildcard-import
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://2dot.ai",
+]
+
 DEBUG = False
 
 NUCLIO["HOST"] = os.getenv("CVAT_NUCLIO_HOST", "nuclio")
