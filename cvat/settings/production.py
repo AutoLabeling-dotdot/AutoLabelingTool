@@ -9,6 +9,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://2dot.ai",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://2dot.ai",
+]
+
 # CSRF 쿠키 설정 추가
 CSRF_COOKIE_SAMESITE = 'Lax'  # 또는 'Strict'
 CSRF_COOKIE_SECURE = True
