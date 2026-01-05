@@ -9,6 +9,16 @@ CSRF_TRUSTED_ORIGINS = [
     "https://2dot.ai",
 ]
 
+# CSRF 쿠키 설정 추가
+CSRF_COOKIE_SAMESITE = 'Lax'  # 또는 'Strict'
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False  # JavaScript가 접근 가능해야 함
+CSRF_USE_SESSIONS = False
+
+# 세션 설정
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = True
+
 DEBUG = False
 
 NUCLIO["HOST"] = os.getenv("CVAT_NUCLIO_HOST", "nuclio")
