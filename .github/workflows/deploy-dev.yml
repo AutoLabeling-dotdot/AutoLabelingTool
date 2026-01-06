@@ -44,7 +44,7 @@ jobs:
 
           echo "🔨 Building Docker images..."
           export NGINX_CONF=react_nginx.conf
-          docker compose -f docker-compose.yml -f docker-compose.build.yml build
+          docker compose -f docker-compose.yml -f docker-compose.build.yml build --build-arg CVAT_CONFIGURATION=development
 
           echo "🚀 Starting services..."
           export CVAT_HOST=172.16.0.172
