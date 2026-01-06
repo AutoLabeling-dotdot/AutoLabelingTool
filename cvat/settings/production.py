@@ -7,14 +7,14 @@ from .base import *  # pylint: disable=wildcard-import
 
 CSRF_TRUSTED_ORIGINS = [
     "https://2dot.ai",
-    "http://172.16.0.172",
-    "http://172.16.0.172:8080",
+    # "http://172.16.0.172",
+    # "http://172.16.0.172:8080",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "https://2dot.ai",
-    "http://172.16.0.172",
-    "http://172.16.0.172:8080",
+    # "http://172.16.0.172",
+    # "http://172.16.0.172:8080",
 ]
 
 # CSRF 쿠키 설정 추가
