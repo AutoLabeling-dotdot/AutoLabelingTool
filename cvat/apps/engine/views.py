@@ -15,9 +15,8 @@ from abc import ABCMeta, abstractmethod
 from contextlib import suppress
 from copy import copy
 from datetime import datetime
-from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 import django_rq
 from attr.converters import to_bool
@@ -66,7 +65,7 @@ from cvat.apps.engine.frame_provider import (
     JobFrameProvider,
     TaskFrameProvider,
 )
-from cvat.apps.engine.media_extractors import get_mime
+from cvat.apps.engine.media_extractors import get_mime, get_video_chapters
 from cvat.apps.engine.mixins import BackupMixin, DatasetMixin, PartialUpdateModelMixin, UploadMixin
 from cvat.apps.engine.model_utils import bulk_create
 from cvat.apps.engine.models import (
@@ -228,9 +227,9 @@ class ServerViewSet(viewsets.ViewSet):
         if directory_param.startswith("/"):
             directory_param = directory_param[1:]
 
-        directory = (Path(settings.SHARE_ROOT) / directory_param).absolute()
+        directory = (settings.SHARE_ROOT / directory_param).resolve()
 
-        if str(directory).startswith(settings.SHARE_ROOT) and directory.is_dir():
+        if directory.is_relative_to(settings.SHARE_ROOT) and directory.is_dir():
             data = []
             generator = directory.iterdir() if not search_param else (f for f in directory.iterdir() if f.name.startswith(search_param))
 
@@ -497,7 +496,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
     def preview(self, request: ExtendedRequest, pk: int):
         self._object = self.get_object() # call check_object_permissions as well
 
-        first_task: Optional[models.Task] = self._object.tasks.order_by('-id').first()
+        first_task: models.Task | None = self._object.tasks.order_by('-id').first()
         if not first_task:
             return HttpResponseNotFound('Project image preview not found')
 
@@ -530,7 +529,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 
 class _DataGetter(metaclass=ABCMeta):
     def __init__(
-        self, data_type: str, data_num: Optional[Union[str, int]], data_quality: str
+        self, data_type: str, data_num: str | int | None, data_quality: str
     ) -> None:
         possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image')
         possible_quality_values = ('compressed', 'original')
@@ -623,7 +622,7 @@ class _TaskDataGetter(_DataGetter):
         *,
         data_type: str,
         data_quality: str,
-        data_num: Optional[Union[str, int]] = None,
+        data_num: str | int | None = None,
     ) -> None:
         super().__init__(data_type=data_type, data_num=data_num, data_quality=data_quality)
         self._db_task = db_task
@@ -644,8 +643,8 @@ class _JobDataGetter(_DataGetter):
         *,
         data_type: str,
         data_quality: str,
-        data_num: Optional[Union[str, int]] = None,
-        data_index: Optional[Union[str, int]] = None,
+        data_num: str | int | None = None,
+        data_index: str | int | None = None,
     ) -> None:
         possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image')
         possible_quality_values = ('compressed', 'original')
@@ -1480,8 +1479,10 @@ class TaskViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 
         if hasattr(db_task.data, 'video'):
             media = [db_task.data.video]
+            chapters = get_video_chapters(db_task.data.get_manifest_path())
         else:
             media = list(db_task.data.images.all())
+            chapters = None
 
         frame_meta = [{
             'width': item.width,
@@ -1493,6 +1494,7 @@ class TaskViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         db_data = db_task.data
         db_data.frames = frame_meta
         db_data.chunks_updated_date = db_task.get_chunks_updated_date()
+        db_data.chapters = chapters
 
         serializer = DataMetaReadSerializer(db_data)
         return Response(serializer.data)
@@ -1715,7 +1717,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateMo
         if instance.type != JobType.GROUND_TRUTH:
             raise ValidationError("Only ground truth jobs can be removed")
 
-        validation_layout: Optional[models.ValidationLayout] = getattr(
+        validation_layout: models.ValidationLayout | None = getattr(
             instance.segment.task.data, 'validation_layout', None
         )
         if (validation_layout and validation_layout.mode == models.ValidationMode.GT_POOL):
@@ -1985,6 +1987,10 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateMo
 
         if hasattr(db_data, 'video'):
             media = [db_data.video]
+            chapters = get_video_chapters(
+                db_task.data.get_manifest_path(),
+                segment=(data_start_frame, data_stop_frame)
+            )
         else:
             media = [
                 # Insert placeholders if frames are skipped
@@ -1996,6 +2002,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateMo
                 for f in db_data.images.all()
                 if f.frame in range(data_start_frame, data_stop_frame + frame_step, frame_step)
             ]
+            chapters = None
 
         deleted_frames = set(db_data.deleted_frames)
         if db_job.type == models.JobType.GROUND_TRUTH:
@@ -2022,6 +2029,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateMo
         } for item in media]
 
         db_data.frames = frame_meta
+        db_data.chapters = chapters
 
         serializer = DataMetaReadSerializer(db_data)
         return Response(serializer.data)
@@ -2462,13 +2470,11 @@ class UserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         user = self.request.user
         is_self = int(self.kwargs.get("pk", 0)) == user.id or \
             self.action == "self"
-        if user.is_staff:
-            return UserSerializer if not is_self else UserSerializer
+
+        if is_self or user.is_superuser:
+            return UserSerializer
         else:
-            if is_self and self.request.method in SAFE_METHODS:
-                return UserSerializer
-            else:
-                return BasicUserSerializer
+            return BasicUserSerializer
 
     @extend_schema(summary='Get details of the current user',
         responses={
@@ -2615,8 +2621,8 @@ class CloudStorageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
             if (manifest_path := request.query_params.get('manifest_path')):
                 manifest_prefix = os.path.dirname(manifest_path)
 
-                full_manifest_path = os.path.join(db_storage.get_storage_dirname(), manifest_path)
-                if not os.path.exists(full_manifest_path) or \
+                full_manifest_path = db_storage.get_storage_dirname() / manifest_path
+                if not full_manifest_path.exists() or \
                         datetime.fromtimestamp(os.path.getmtime(full_manifest_path), tz=timezone.utc) < storage.get_file_last_modified(manifest_path):
                     storage.download_file(manifest_path, full_manifest_path)
                 manifest = ImageManifestManager(full_manifest_path, db_storage.get_storage_dirname())
