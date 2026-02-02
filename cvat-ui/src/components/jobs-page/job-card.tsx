@@ -99,8 +99,10 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                     onClick={onClick}
                 >
                     <Descriptions column={1} size='small'>
+                        <Descriptions.Item label='Task'>{job.taskName}</Descriptions.Item>
                         <Descriptions.Item label='Stage and state'>{`${job.stage} ${job.state}`}</Descriptions.Item>
                         <Descriptions.Item label='Frames'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
+                        <Descriptions.Item label='Created'>{new Date(job.createdDate).toLocaleDateString()}</Descriptions.Item>
                         {job.assignee ? (
                             <Descriptions.Item label='Assignee'>{job.assignee.username}</Descriptions.Item>
                         ) : (

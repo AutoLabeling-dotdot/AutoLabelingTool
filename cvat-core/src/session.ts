@@ -523,6 +523,7 @@ export class Job extends Session {
         project_id: number | null;
         guide_id: number | null;
         task_id: number;
+        task_name: string;
         labels: Label[];
         dimension?: DimensionType;
         data_compressed_chunk_type?: ChunkType;
@@ -552,6 +553,7 @@ export class Job extends Session {
             project_id: null,
             guide_id: null,
             task_id: null,
+            task_name: null,
             labels: [],
             dimension: undefined,
             data_compressed_chunk_type: undefined,
@@ -572,6 +574,7 @@ export class Job extends Session {
         this.#data.stop_frame = initialData.stop_frame ?? this.#data.stop_frame;
         this.#data.frame_count = initialData.frame_count ?? this.#data.frame_count;
         this.#data.task_id = initialData.task_id ?? this.#data.task_id;
+        this.#data.task_name = initialData.task_name ?? this.#data.task_name;
         this.#data.dimension = initialData.dimension ?? this.#data.dimension;
         this.#data.data_compressed_chunk_type =
             initialData.data_compressed_chunk_type ?? this.#data.data_compressed_chunk_type;
@@ -677,6 +680,10 @@ export class Job extends Session {
 
     public get taskId(): number {
         return this.#data.task_id;
+    }
+
+    public get taskName(): string {
+        return this.#data.task_name;
     }
 
     public get dimension(): DimensionType {
