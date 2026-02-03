@@ -759,6 +759,7 @@ class JobReadListSerializer(serializers.ListSerializer):
 
 class JobReadSerializer(serializers.ModelSerializer):
     task_id = serializers.ReadOnlyField(source="get_task_id")
+    task_name = serializers.ReadOnlyField(source="segment.task.name")
     project_id = serializers.ReadOnlyField(source="get_project_id", allow_null=True)
     guide_id = serializers.ReadOnlyField(source="get_guide_id", allow_null=True)
     start_frame = serializers.ReadOnlyField(source="segment.start_frame")
@@ -782,7 +783,7 @@ class JobReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Job
-        fields = ('url', 'id', 'task_id', 'project_id', 'assignee', 'guide_id',
+        fields = ('url', 'id', 'task_id', 'task_name', 'project_id', 'assignee', 'guide_id',
             'dimension', 'bug_tracker', 'status', 'stage', 'state', 'mode', 'frame_count',
             'start_frame', 'stop_frame',
             'data_chunk_size', 'data_compressed_chunk_type', 'data_original_chunk_type',

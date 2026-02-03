@@ -61,7 +61,7 @@ services:
     image: redis:7.2-alpine
     container_name: cvat_redis_inmem
     restart: always
-    command: ["redis-server", "--save", "60", "100", "--appendonly", "yes"]
+    command: ["redis-server", "--maxmemory", "2gb", "--maxmemory-policy", "allkeys-lru", "--appendonly", "yes"]
     volumes:
       - cvat_inmem_db:/data
     networks: [cvat]
