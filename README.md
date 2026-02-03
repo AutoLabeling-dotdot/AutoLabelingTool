@@ -143,6 +143,16 @@ sudo apt-get install -y nodejs
 # Corepack 설치
 sudo npm -g install corepack
 
+# npm 버전 업그레이드 필요
+sudo npm install -g npm@11.8.0  # 버전은 달라질 수 있음, notice 확인
+
+# corepack 사용
+sudo corepack enable
+yarn set version stable
+
+# Yarn 버전 확인 (4.x 이어야 함 아니라면 아래 진행)
+yarn --version
+
 # 기존 Yarn 1.x 제거 (있는 경우)
 sudo npm uninstall -g yarn
 
@@ -185,6 +195,15 @@ yarn --immutable
 
 ### 5. 데이터베이스 초기화
 
+#### DB 및 Redis 컨테이너 시작
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d \
+  cvat_db cvat_redis_inmem cvat_redis_ondisk
+```
+
+#### DB 초기화
+
 ```bash
 python manage.py migrate
 python manage.py migrateredis
@@ -193,13 +212,6 @@ python manage.py syncperiodicjobs
 ```
 
 ### 6. Docker 서비스 시작
-
-#### DB 및 Redis 컨테이너 시작
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d \
-  cvat_db cvat_redis_inmem cvat_redis_ondisk
-```
 
 #### OPA (Open Policy Agent) 시작
 
@@ -242,6 +254,7 @@ yarn run start:cvat-ui
 
 - **백엔드 (Django API)**: http://localhost:7000
 - **프론트엔드 (CVAT UI)**: http://localhost:3000
+  - 참고: 최초 실행 시 느림
 - **OPA (정책 엔진)**: http://localhost:8181
 
 ---
