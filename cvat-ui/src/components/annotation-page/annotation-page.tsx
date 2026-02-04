@@ -84,6 +84,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                 const notificationKey = `cvat-notification-continue-job-${job.id}`;
                 notification.info({
                     key: notificationKey,
+                    duration: 0,  // 사용자가 직접 닫을 때까지 유지
                     message: `You finished working on frame ${latestFrame}`,
                     description: (
                         <span>
