@@ -874,7 +874,7 @@ class TaskViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
     """)
     simple_filters = list(search_fields) + ['project_id']
     ordering_fields = list(filter_fields)
-    ordering = "-id"
+    ordering = "name"
     iam_organization_field = 'organization'
     iam_permission_class = TaskPermission
 
