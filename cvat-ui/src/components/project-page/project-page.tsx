@@ -287,7 +287,7 @@ export default function ProjectPageComponent(): JSX.Element {
                                     onVisibleChange={(visible: boolean) => (
                                         setVisibility({ ...defaultVisibility, sorting: visible })
                                     )}
-                                    defaultFields={tasksQuery.sort?.split(',') || ['-ID']}
+                                    defaultFields={tasksQuery.sort?.split(',') || ['-Name']}
                                     sortingFields={['ID', 'Owner', 'Status', 'Assignee', 'Updated date', 'Subset', 'Mode', 'Dimension', 'Name']}
                                     onApplySorting={(sorting: string | null) => {
                                         dispatch(getProjectTasksAsync({

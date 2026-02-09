@@ -84,7 +84,7 @@ function JobListComponent(props: Readonly<Props>): JSX.Element {
     const defaultQuery: JobsQuery = {
         page: 1,
         pageSize: 10,
-        sort: null,
+        sort: '-id',
         search: null,
         filter: null,
     };

@@ -874,7 +874,7 @@ class TaskViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
     """)
     simple_filters = list(search_fields) + ['project_id']
     ordering_fields = list(filter_fields)
-    ordering = "name"
+    ordering = "-name"
     iam_organization_field = 'organization'
     iam_permission_class = TaskPermission
 
@@ -1674,7 +1674,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateMo
     ]
     simple_filters = list(set(filter_fields) - {'id', 'updated_date'})
     ordering_fields = list(filter_fields)
-    ordering = "-id"
+    ordering = ("-task_name", "-id")
     lookup_fields = {
         'dimension': 'segment__task__dimension',
         'task_id': 'segment__task_id',
