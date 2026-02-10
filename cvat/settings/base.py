@@ -733,8 +733,18 @@ DATABASES = {
         "USER": os.getenv("CVAT_POSTGRES_USER", "root"),
         "PASSWORD": postgres_password,
         "PORT": os.getenv("CVAT_POSTGRES_PORT", 5432),
+        # RDS 최적화를 위한 연결 풀링
+        "CONN_MAX_AGE": 600, # 10분간 연결 재사용
+        # 재사용 전 연결 상태 확인 (Django 4.1+)
+        "CONN_HEALTH_CHECKS": True,
         "OPTIONS": {
             "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "cvat"),
+            # RDS 연결 최적화
+            "connect_timeout": 10,  # 연결 타임아웃 (초)
+            "keepalives": 1,  # TCP keepalive 활성화
+            "keepalives_idle": 30,  # 유휴 상태 후 keepalive 시작 (초)
+            "keepalives_interval": 10,  # Keepalive 프로브 간격 (초)
+            "keepalives_count": 5,  # 연결 끊기 전 최대 keepalive 시도 횟수
         },
     }
 }
