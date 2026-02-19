@@ -151,25 +151,35 @@ jobs:
 
             echo "✅ 배포 완료!"
 
+      # Traefik이 Host 헤더 기반 라우팅을 사용하므로 Host 헤더를 명시적으로 전달
       - name: Health Check
-        run: |
-          echo "⏳ 서비스 초기화 대기 중 (30초)..."
-          sleep 30
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PUBLIC_EC2_HOST }}
+          username: ${{ secrets.PUBLIC_EC2_USER }}
+          key: ${{ secrets.PUBLIC_EC2_SSH_KEY }}
+          envs: CVAT_HOST
+          script: |
+            echo "⏳ 서비스 초기화 대기 중 (30초)..."
+            sleep 30
 
-          for i in {1..6}; do
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-              "http://${{ secrets.PUBLIC_EC2_HOST }}:8080/api/health" || echo "000")
+            CVAT_HOST="${{ secrets.PUBLIC_EC2_HOST }}"
 
-            if [ "$STATUS" = "200" ]; then
-              echo "✅ 헬스체크 통과! (HTTP $STATUS)"
-              exit 0
-            fi
-            echo "⏳ 시도 $i/6: HTTP $STATUS — 10초 후 재시도..."
-            sleep 10
-          done
+            for i in $(seq 1 6); do
+              STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+                -H "Host: ${CVAT_HOST}" \
+                "http://localhost:8080/api/health" || echo "000")
 
-          echo "❌ 헬스체크 6회 실패"
-          exit 1
+              if [ "$STATUS" = "200" ]; then
+                echo "✅ 헬스체크 통과! (HTTP $STATUS)"
+                exit 0
+              fi
+              echo "⏳ 시도 $i/6: HTTP $STATUS — 10초 후 재시도..."
+              sleep 10
+            done
+
+            echo "❌ 헬스체크 6회 실패"
+            exit 1
 
       # 헬스체크 성공 시에만 :rollback 이미지 삭제
       - name: Cleanup :rollback images from ECR
