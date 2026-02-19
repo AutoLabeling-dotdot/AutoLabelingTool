@@ -101,17 +101,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          CVAT_HOST: ${{ secrets.PUBLIC_EC2_HOST }}
           DEPLOY_PATH: ${{ secrets.PUBLIC_EC2_DEPLOY_PATH }}
+          CVAT_HOST: ${{ secrets.PUBLIC_EC2_HOST }}
         with:
           host: ${{ secrets.PUBLIC_EC2_HOST }}
           username: ${{ secrets.PUBLIC_EC2_USER }}
           key: ${{ secrets.PUBLIC_EC2_SSH_KEY }}
-          envs: GH_TOKEN,GH_REPO,CVAT_HOST,DEPLOY_PATH
+          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST
           script: |
             set -euo pipefail
 
             echo "📂 배포 디렉토리 준비..."
+
+            # Git 2.35.2+ 보안 정책: 디렉토리 소유자가 다를 경우 오류 방지
+            git config --global --add safe.directory "${DEPLOY_PATH}"
+
             if [ ! -d "${DEPLOY_PATH}/.git" ]; then
               echo "📥 최초 배포: 저장소 클론 중..."
               git clone https://oauth2:${GH_TOKEN}@github.com/${GH_REPO}.git "${DEPLOY_PATH}"
@@ -124,6 +128,10 @@ jobs:
               git checkout develop
               git reset --hard origin/develop
             fi
+            # GitHub Secrets에서 주입된 CVAT_HOST를 docker compose에 전달
+            # (envs 파라미터로 이미 주입됨 → export로 셸 환경에 명시)
+            export CVAT_HOST=${CVAT_HOST}
+            echo "⚙️  CVAT_HOST=${CVAT_HOST}"
 
             echo "🔐 ECR 로그인..."
             aws ecr get-login-password --region ap-southeast-1 | \
@@ -136,7 +144,6 @@ jobs:
               pull
 
             echo "🚀 서비스 기동..."
-            CVAT_HOST=${CVAT_HOST} \
             docker compose \
               -f docker-compose.yml \
               -f docker-compose.public-aws.yml \
