@@ -103,11 +103,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
           DEPLOY_PATH: ${{ secrets.PUBLIC_EC2_DEPLOY_PATH }}
           CVAT_HOST: ${{ secrets.PUBLIC_EC2_HOST }}
+          LE_EMAIL: ${{ secrets.PUBLIC_LE_EMAIL }}
         with:
           host: ${{ secrets.PUBLIC_EC2_HOST }}
           username: ${{ secrets.PUBLIC_EC2_USER }}
           key: ${{ secrets.PUBLIC_EC2_SSH_KEY }}
-          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST
+          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST,LE_EMAIL
           script: |
             set -euo pipefail
 
@@ -128,9 +129,9 @@ jobs:
               git checkout develop
               git reset --hard origin/develop
             fi
-            # GitHub Secrets에서 주입된 CVAT_HOST를 docker compose에 전달
-            # (envs 파라미터로 이미 주입됨 → export로 셸 환경에 명시)
+            # GitHub Secrets에서 주입된 변수들을 docker compose에 전달
             export CVAT_HOST=${CVAT_HOST}
+            export LE_EMAIL=${LE_EMAIL}
             echo "⚙️  CVAT_HOST=${CVAT_HOST}"
 
             echo "🔐 ECR 로그인..."
@@ -151,14 +152,13 @@ jobs:
 
             echo "✅ 배포 완료!"
 
-      # Traefik이 Host 헤더 기반 라우팅을 사용하므로 Host 헤더를 명시적으로 전달
+      # HTTPS로 EC2 내부에서 헬스체크 (--resolve로 DNS 없이 localhost 443 접근)
       - name: Health Check
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.PUBLIC_EC2_HOST }}
           username: ${{ secrets.PUBLIC_EC2_USER }}
           key: ${{ secrets.PUBLIC_EC2_SSH_KEY }}
-          envs: CVAT_HOST
           script: |
             echo "⏳ 서비스 초기화 대기 중 (30초)..."
             sleep 30
@@ -167,11 +167,11 @@ jobs:
 
             for i in $(seq 1 6); do
               STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-                -H "Host: ${CVAT_HOST}" \
-                "http://localhost:8080/api/server/about" || echo "000")
+                --resolve "${CVAT_HOST}:443:127.0.0.1" \
+                "https://${CVAT_HOST}/api/server/about" || echo "000")
 
               if [ "$STATUS" = "200" ]; then
-                echo "✅ 헬스체크 통과! (HTTP $STATUS)"
+                echo "✅ 헬스체크 통과! (HTTPS $STATUS)"
                 exit 0
               fi
               echo "⏳ 시도 $i/6: HTTP $STATUS — 10초 후 재시도..."
