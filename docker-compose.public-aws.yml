@@ -1,0 +1,39 @@
+# AWS Public Dev 서버용 Docker Compose override 파일
+#
+# 사용법:
+#   docker compose -f docker-compose.yml -f docker-compose.public-aws.yml [command]
+#
+# 이 파일은 docker-compose.yml의 image 참조만 ECR URI로 교체합니다.
+# DB(PostgreSQL), Analytics(ClickHouse/Grafana/Vector), Traefik 등
+# 나머지 모든 설정은 docker-compose.yml에서 그대로 상속됩니다.
+
+services:
+  cvat_server:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_utils:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_import:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_export:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_annotation:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_webhooks:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_quality_reports:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_chunks:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_worker_consensus:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+
+  cvat_ui:
+    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-ui:latest
