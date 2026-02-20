@@ -104,6 +104,7 @@ jobs:
           DEPLOY_PATH: ${{ secrets.PUBLIC_EC2_DEPLOY_PATH }}
           CVAT_HOST: ${{ secrets.PUBLIC_EC2_HOST }}
           LE_EMAIL: ${{ secrets.PUBLIC_LE_EMAIL }}
+          CVAT_POSTGRES_PASSWORD: ${{ secrets.CVAT_POSTGRES_PASSWORD }}
         with:
           host: ${{ secrets.PUBLIC_EC2_HOST }}
           username: ${{ secrets.PUBLIC_EC2_USER }}
@@ -132,6 +133,7 @@ jobs:
             # GitHub Secrets에서 주입된 변수들을 docker compose에 전달
             export CVAT_HOST=${CVAT_HOST}
             export LE_EMAIL=${LE_EMAIL}
+            export CVAT_POSTGRES_PASSWORD=${CVAT_POSTGRES_PASSWORD}
             echo "⚙️  CVAT_HOST=${CVAT_HOST}"
 
             echo "🔐 ECR 로그인..."
