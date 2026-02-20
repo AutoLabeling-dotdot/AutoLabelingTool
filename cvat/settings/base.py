@@ -733,13 +733,11 @@ DATABASES = {
         "USER": os.getenv("CVAT_POSTGRES_USER", "root"),
         "PASSWORD": postgres_password,
         "PORT": os.getenv("CVAT_POSTGRES_PORT", 5432),
-        # RDS 최적화를 위한 연결 풀링
-        "CONN_MAX_AGE": 600, # 10분간 연결 재사용
-        # 재사용 전 연결 상태 확인 (Django 4.1+)
-        "CONN_HEALTH_CHECKS": True,
+        # CONN_MAX_AGE=0: 멀티프로세스 worker 환경에서 커넥션을 요청 완료 즉시 반환
+        # (persistent connection은 import 같은 장시간 작업 중 커넥션 고갈을 유발함)
+        "CONN_MAX_AGE": 0,
         "OPTIONS": {
             "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "cvat"),
-            # RDS 연결 최적화
             "connect_timeout": 10,  # 연결 타임아웃 (초)
             "keepalives": 1,  # TCP keepalive 활성화
             "keepalives_idle": 30,  # 유휴 상태 후 keepalive 시작 (초)
