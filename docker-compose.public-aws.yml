@@ -20,6 +20,10 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
     labels:
       traefik.enable: 'true'
       traefik.http.services.cvat.loadbalancer.server.port: '8080'
@@ -31,41 +35,73 @@ services:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_import:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_export:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_annotation:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_webhooks:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_quality_reports:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_chunks:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_worker_consensus:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
     environment:
       <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
 
   cvat_ui:
     image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-ui:latest

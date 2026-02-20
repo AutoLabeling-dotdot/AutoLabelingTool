@@ -163,8 +163,8 @@ jobs:
           username: ${{ secrets.PUBLIC_EC2_USER }}
           key: ${{ secrets.PUBLIC_EC2_SSH_KEY }}
           script: |
-            echo "⏳ 서비스 초기화 대기 중 (30초)..."
-            sleep 30
+            echo "⏳ 서비스 초기화 대기 중 (60초)..."
+            sleep 60
 
             CVAT_HOST="${{ secrets.PUBLIC_EC2_HOST }}"
 
