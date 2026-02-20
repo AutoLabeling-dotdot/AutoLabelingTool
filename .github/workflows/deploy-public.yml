@@ -87,6 +87,7 @@ jobs:
       ECR_REGISTRY: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com
       SERVER_REPO: bytesize/public-dotdot-server
       UI_REPO: bytesize/public-dotdot-ui
+      CVAT_POSTGRES_PASSWORD: ${{ secrets.CVAT_POSTGRES_PASSWORD }}
 
     steps:
       - name: Configure AWS Credentials
@@ -104,12 +105,12 @@ jobs:
           DEPLOY_PATH: ${{ secrets.PUBLIC_EC2_DEPLOY_PATH }}
           CVAT_HOST: ${{ secrets.PUBLIC_EC2_HOST }}
           LE_EMAIL: ${{ secrets.PUBLIC_LE_EMAIL }}
-          CVAT_POSTGRES_PASSWORD: ${{ secrets.CVAT_POSTGRES_PASSWORD }}
+
         with:
           host: ${{ secrets.PUBLIC_EC2_HOST }}
           username: ${{ secrets.PUBLIC_EC2_USER }}
           key: ${{ secrets.PUBLIC_EC2_SSH_KEY }}
-          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST,LE_EMAIL
+          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST,LE_EMAIL,CVAT_POSTGRES_PASSWORD
           script: |
             set -euo pipefail
 
