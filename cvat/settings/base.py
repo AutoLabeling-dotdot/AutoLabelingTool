@@ -733,16 +733,14 @@ DATABASES = {
         "USER": os.getenv("CVAT_POSTGRES_USER", "root"),
         "PASSWORD": postgres_password,
         "PORT": os.getenv("CVAT_POSTGRES_PORT", 5432),
-        # CONN_MAX_AGE=0: 멀티프로세스 worker 환경에서 커넥션을 요청 완료 즉시 반환
-        # (persistent connection은 import 같은 장시간 작업 중 커넥션 고갈을 유발함)
-        "CONN_MAX_AGE": 0,
+        # "CONN_MAX_AGE": 0,  # CONN_MAX_AGE=0: 멀티프로세스 worker 환경에서 커넥션을 요청 완료 즉시 반환
         "OPTIONS": {
             "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "cvat"),
-            "connect_timeout": 10,  # 연결 타임아웃 (초)
-            "keepalives": 1,  # TCP keepalive 활성화
-            "keepalives_idle": 30,  # 유휴 상태 후 keepalive 시작 (초)
-            "keepalives_interval": 10,  # Keepalive 프로브 간격 (초)
-            "keepalives_count": 5,  # 연결 끊기 전 최대 keepalive 시도 횟수
+            # "connect_timeout": 10,  # 연결 타임아웃 (초)
+            # "keepalives": 1,  # TCP keepalive 활성화
+            # "keepalives_idle": 30,  # 유휴 상태 후 keepalive 시작 (초)
+            # "keepalives_interval": 10,  # Keepalive 프로브 간격 (초)
+            # "keepalives_count": 5,  # 연결 끊기 전 최대 keepalive 시도 횟수
         },
     }
 }
