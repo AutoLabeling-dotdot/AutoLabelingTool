@@ -9,7 +9,7 @@
 #   3. cvat_server / cvat_ui 라우터 → websecure 엔트리포인트
 
 x-rds-env: &rds-env
-  CVAT_POSTGRES_HOST: database-public-dotdot.cju80cyi2br3.ap-southeast-1.rds.amazonaws.com
+  CVAT_POSTGRES_HOST: single-seoul-dotdot-rds.cdisuc2aaj7u.ap-northeast-2.rds.amazonaws.com
   CVAT_POSTGRES_PORT: 5432
   CVAT_POSTGRES_USER: dotdotadmin
   CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
@@ -17,7 +17,7 @@ x-rds-env: &rds-env
 
 services:
   cvat_server:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -32,7 +32,7 @@ services:
       traefik.http.routers.cvat.tls.certresolver: letsencrypt
 
   cvat_worker_utils:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -41,7 +41,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_import:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -50,7 +50,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_export:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -59,7 +59,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_annotation:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -68,7 +68,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_webhooks:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -77,7 +77,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_quality_reports:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -86,7 +86,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_chunks:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -95,7 +95,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_worker_consensus:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-server:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
     volumes:
@@ -104,7 +104,7 @@ services:
       - /data/cvat/logs:/home/django/logs
 
   cvat_ui:
-    image: 895409929723.dkr.ecr.ap-southeast-1.amazonaws.com/bytesize/public-dotdot-ui:latest
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-ui:latest
     labels:
       traefik.enable: 'true'
       traefik.http.services.cvat-ui.loadbalancer.server.port: '8000'
