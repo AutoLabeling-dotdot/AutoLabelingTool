@@ -1,34 +1,15 @@
-<!-- Raise an issue to propose your change (https://github.com/cvat-ai/cvat/issues).
-It helps to avoid duplication of efforts from multiple independent contributors.
-Discuss your ideas with maintainers to be sure that changes will be approved and merged.
-Read the [Contribution guide](https://docs.cvat.ai/docs/contributing/). -->
+## #️⃣연관된 이슈
 
-<!-- Provide a general summary of your changes in the Title above -->
+> ex) close #이슈번호
 
-### Motivation and context
-<!-- Why is this change required? What problem does it solve? If it fixes an open
-issue, please link to the issue here. Describe your changes in detail, add
-screenshots. -->
+## 📝작업 내용
 
-### How has this been tested?
-<!-- Please describe in detail how you tested your changes.
-Include details of your testing environment, and the tests you ran to
-see how your change affects other areas of the code, etc. -->
+> 이번 PR에서 작업한 내용을 간략히 설명해주세요(이미지 첨부 가능)
 
-### Checklist
-<!-- Go over all the following points, and put an `x` in all the boxes that apply.
-If an item isn't applicable for some reason, then ~~explicitly strikethrough~~ the whole
-line. If you don't do that, GitHub will show incorrect progress for the pull request.
-If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
-- [ ] I submit my changes into the `develop` branch
-- [ ] I have created a changelog fragment <!-- see top comment in CHANGELOG.md -->
-- [ ] I have updated the documentation accordingly
-- [ ] I have added tests to cover my changes
-- [ ] I have linked related issues (see [GitHub docs](
-  https://help.github.com/en/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword))
+### 스크린샷 (선택)
 
-### License
+## 💬리뷰 요구사항(선택)
 
-- [ ] I submit _my code changes_ under the same [MIT License](
-  https://github.com/cvat-ai/cvat/blob/develop/LICENSE) that covers the project.
-  Feel free to contact the maintainers if that's a concern.
+> 리뷰어가 특별히 봐주었으면 하는 부분이 있다면 작성해주세요
+>
+> ex) 메서드 XXX의 이름을 더 잘 짓고 싶은데 혹시 좋은 명칭이 있을까요?
