@@ -147,14 +147,14 @@ jobs:
               -f docker-compose.single.yml \
               pull
 
-            echo "�️ DB 마이그레이션 실행..."
-            # 인자 없이 실행 → 미적용된 모든 migration을 자동으로 반영
+            echo "🗄️ DB 마이그레이션 실행..."
+            # init subcommand: DB 연결 대기 + migrate + redis migrate 자동 처리
             docker compose \
               -f docker-compose.yml \
               -f docker-compose.single.yml \
-              run --rm cvat_server python manage.py migrate
+              run --rm cvat_server init
 
-            echo "�🚀 서비스 기동..."
+            echo "🚀 서비스 기동..."
             docker compose \
               -f docker-compose.yml \
               -f docker-compose.single.yml \
