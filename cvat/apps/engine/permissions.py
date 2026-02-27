@@ -1032,6 +1032,8 @@ class JobPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
                         "assignee": Scopes.UPDATE_ASSIGNEE,
                         "stage": Scopes.UPDATE_STAGE,
                         "state": Scopes.UPDATE_STATE,
+                        # Save 시점의 마지막 프레임 번호 업데이트 - state와 동일한 scope 사용
+                        "last_frame": Scopes.UPDATE_STATE,
                     },
                 )
             )

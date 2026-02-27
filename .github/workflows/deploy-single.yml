@@ -147,7 +147,14 @@ jobs:
               -f docker-compose.single.yml \
               pull
 
-            echo "🚀 서비스 기동..."
+            echo "�️ DB 마이그레이션 실행..."
+            # 인자 없이 실행 → 미적용된 모든 migration을 자동으로 반영
+            docker compose \
+              -f docker-compose.yml \
+              -f docker-compose.single.yml \
+              run --rm cvat_server python manage.py migrate
+
+            echo "�🚀 서비스 기동..."
             docker compose \
               -f docker-compose.yml \
               -f docker-compose.single.yml \

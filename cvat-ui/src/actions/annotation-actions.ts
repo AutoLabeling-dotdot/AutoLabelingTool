@@ -1055,9 +1055,15 @@ export function saveAnnotationsAsync(): ThunkAction {
             await saveJobEvent.close();
             dispatch(saveLogsAsync());
 
+            // Save 시점의 현재 프레임 번호를 Redux store에서 읽어 last_frame으로 저장
+            const currentFrameNumber = getStore().getState().annotation.player.frame.number;
+            const fieldsToUpdate: Record<string, any> = { last_frame: currentFrameNumber };
+
+            // Job이 NEW 상태이면 IN_PROGRESS로 함께 변경 (API 호출 1회로 통합)
             if (jobInstance instanceof cvat.classes.Job && jobInstance.state === cvat.enums.JobState.NEW) {
-                await dispatch(updateJobAsync(jobInstance, { state: JobState.IN_PROGRESS }));
+                fieldsToUpdate.state = JobState.IN_PROGRESS;
             }
+            await dispatch(updateJobAsync(jobInstance, fieldsToUpdate));
 
             dispatch({
                 type: AnnotationActionTypes.SAVE_ANNOTATIONS_SUCCESS,

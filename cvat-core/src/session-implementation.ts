@@ -76,6 +76,8 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
                     ...('assignee' in fields ? { assignee: fields.assignee } : {}),
                     ...('stage' in fields ? { stage: fields.stage } : {}),
                     ...('state' in fields ? { state: fields.state } : {}),
+                    // Save 시점의 마지막 프레임 번호 - serverProxy에 전달하여 BE에 저장
+                    ...('last_frame' in fields ? { last_frame: fields.last_frame } : {}),
                 };
 
                 if (jobData.assignee) {
@@ -790,7 +792,7 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
             const { taskID, rqID } = await serverProxy.tasks.create(
                 taskSpec,
                 taskDataSpec,
-                options?.updateStatusCallback || (() => {}),
+                options?.updateStatusCallback || (() => { }),
             );
 
             await requestsManager.listen(rqID, {

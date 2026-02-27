@@ -11,11 +11,11 @@
     .cvat-jobs-page-top-bar {
         margin-bottom: $grid-unit-size;
 
-        > div {
+        >div {
             display: flex;
             justify-content: space-between;
 
-            > div {
+            >div {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -25,8 +25,8 @@
                     width: $grid-unit-size * 32;
                 }
 
-                > div {
-                    > *:not(:last-child) {
+                >div {
+                    >*:not(:last-child) {
                         margin-right: $grid-unit-size;
                     }
 
@@ -85,7 +85,7 @@
             height: 100%;
             width: 100%;
 
-            > .cvat-jobs-page-job-item-card-preview {
+            >.cvat-jobs-page-job-item-card-preview {
                 .ant-empty-image {
                     height: $grid-unit-size * 10;
                 }
@@ -166,12 +166,32 @@
             width: 100%;
             margin-bottom: $grid-unit-size;
 
-            > div:not(:first-child) {
+            >div:not(:first-child) {
                 padding-left: $grid-unit-size;
             }
         }
     }
 
+    // Save 이력이 있을 때 표시되는 progress bar 섹션
+    // padding-right로 우하단 ··· 버튼과 겹치지 않도록 여백 확보
+    .cvat-job-card-progress-section {
+        margin-top: $grid-unit-size;
+        padding-right: $grid-unit-size * 4;
+
+        .cvat-job-card-progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.45);
+            margin-bottom: 0;
+        }
+
+        .ant-progress {
+            line-height: 0;
+        }
+    }
+
+    // ··· 버튼 위치 (카드 우하단 고정)
     .cvat-job-card-more-button {
         position: absolute;
         bottom: $grid-unit-size * 2;

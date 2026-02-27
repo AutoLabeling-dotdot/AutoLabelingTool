@@ -156,6 +156,8 @@ export interface SerializedJob {
     frame_count: number;
     start_frame: number;
     stop_frame: number;
+    // Save 버튼 클릭 시 저장된 마지막 프레임 번호. null이면 아직 Save한 적 없음
+    last_frame?: number | null;
     task_id: number;
     task_name: string;
     updated_date: string;
@@ -591,5 +593,5 @@ export interface SerializedTaskValidationLayout extends SerializedJobValidationL
     disabled_frames?: number[];
 }
 
-export interface APIOrganizationMembersFilter extends APICommonFilterParams {}
+export interface APIOrganizationMembersFilter extends APICommonFilterParams { }
 export type OrganizationMembersFilter = Camelized<APIOrganizationMembersFilter>;
