@@ -103,7 +103,7 @@ class TaskItemComponent extends React.PureComponent<TaskItemProps & RouteCompone
                         }
                     }, 1000);
                 }
-            }).catch(() => {});
+            }).catch(() => { });
         }
     }
 
@@ -194,19 +194,19 @@ class TaskItemComponent extends React.PureComponent<TaskItemProps & RouteCompone
                 <Row>
                     <Col span={24} className='cvat-task-item-progress-wrapper'>
                         <div>
-                            { numOfCompleted > 0 && (
+                            {numOfCompleted > 0 && (
                                 <Text strong className='cvat-task-completed-progress'>
                                     {`\u2022 ${numOfCompleted} done `}
                                 </Text>
                             )}
 
-                            { numOfValidation > 0 && (
+                            {numOfValidation > 0 && (
                                 <Text strong className='cvat-task-validation-progress'>
                                     {`\u2022 ${numOfValidation} on review `}
                                 </Text>
                             )}
 
-                            { numOfAnnotation > 0 && (
+                            {numOfAnnotation > 0 && (
                                 <Text strong className='cvat-task-annotation-progress'>
                                     {`\u2022 ${numOfAnnotation} annotating `}
                                 </Text>
@@ -221,6 +221,7 @@ class TaskItemComponent extends React.PureComponent<TaskItemProps & RouteCompone
                                 percent: (numOfCompleted * 100) / numOfJobs,
                             }}
                             strokeColor='#1890FF'
+                            trailColor='#FAAD14'
                             showInfo={false}
                             size='small'
                         />
