@@ -4,12 +4,14 @@
 // SPDX-License-Identifier: MIT
 
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
 import { Row, Col } from 'antd/lib/grid';
 import Title from 'antd/lib/typography/Title';
 import Text from 'antd/lib/typography/Text';
 
 import { getCore, Project } from 'cvat-core-wrapper';
+import { CombinedState } from 'reducers';
 import LabelsEditor from 'components/labels-editor/labels-editor';
 import BugTrackerEditor from 'components/task-page/bug-tracker-editor';
 import UserSelector from 'components/task-page/user-selector';
@@ -25,6 +27,7 @@ interface DetailsComponentProps {
 export default function DetailsComponent(props: DetailsComponentProps): JSX.Element {
     const { project, onUpdateProject } = props;
     const [projectName, setProjectName] = useState(project.name);
+    const isSuperuser = useSelector((state: CombinedState) => state.auth.user?.isSuperuser ?? false);
 
     return (
         <div data-cvat-project-id={project.id} className='cvat-project-details'>
@@ -72,13 +75,15 @@ export default function DetailsComponent(props: DetailsComponentProps): JSX.Elem
                     />
                 </Col>
             </Row>
-            <LabelsEditor
-                labels={project.labels.map((label: any): string => label.toJSON())}
-                onSubmit={(labels: any[]): void => {
-                    project.labels = labels.map((labelData): any => new core.classes.Label(labelData));
-                    onUpdateProject(project);
-                }}
-            />
+            {isSuperuser && (
+                <LabelsEditor
+                    labels={project.labels.map((label: any): string => label.toJSON())}
+                    onSubmit={(labels: any[]): void => {
+                        project.labels = labels.map((labelData): any => new core.classes.Label(labelData));
+                        onUpdateProject(project);
+                    }}
+                />
+            )}
         </div>
     );
 }
