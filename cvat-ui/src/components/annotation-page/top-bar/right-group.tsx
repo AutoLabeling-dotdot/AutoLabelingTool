@@ -12,9 +12,8 @@ import Modal from 'antd/lib/modal';
 import notification from 'antd/lib/notification';
 
 import { FilterIcon, FullscreenIcon, GuideIcon } from 'icons';
-import config from 'config';
 import {
-    DimensionType, Job, JobStage, JobState,
+    DimensionType, Job,
 } from 'cvat-core-wrapper';
 import { Workspace } from 'reducers';
 
@@ -75,30 +74,6 @@ function RightGroup(props: Props): JSX.Element {
         if (Number.isInteger(jobInstance?.guideId)) {
             if (initialOpenGuide) {
                 openGuide();
-            } else if (
-                jobInstance?.stage === JobStage.ANNOTATION &&
-                jobInstance?.state === JobState.NEW
-            ) {
-                let seenGuides = [];
-                try {
-                    seenGuides = JSON.parse(localStorage.getItem('seenGuides') || '[]');
-                    if (!Array.isArray(seenGuides) || seenGuides.some((el) => !Number.isInteger(el))) {
-                        throw new Error('Wrong structure stored in local storage');
-                    }
-                } catch (error: unknown) {
-                    seenGuides = [];
-                }
-
-                if (!seenGuides.includes(jobInstance.guideId)) {
-                    // open guide if the user have not seen it yet
-                    openGuide();
-                    const updatedSeenGuides = Array
-                        .from(new Set([
-                            jobInstance.guideId,
-                            ...seenGuides.slice(0, config.LOCAL_STORAGE_SEEN_GUIDES_MEMORY_LIMIT - 1),
-                        ]));
-                    localStorage.setItem('seenGuides', JSON.stringify(updatedSeenGuides));
-                }
             }
         }
     }, []);
