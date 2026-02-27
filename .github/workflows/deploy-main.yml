@@ -1,12 +1,12 @@
-name: Deploy on single dotdot (AWS EC2)
+name: Deploy on main dotdot (AWS EC2)
 
 on:
   push:
-    branches: ["develop"]
+    branches: ["main"]
   workflow_dispatch:
 
 concurrency:
-  group: deploy-single
+  group: deploy-main
   cancel-in-progress: false
 
 jobs:
@@ -17,8 +17,8 @@ jobs:
 
     env:
       ECR_REGISTRY: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com
-      SERVER_REPO: bytesize/single-dotdot-server
-      UI_REPO: bytesize/single-dotdot-ui
+      SERVER_REPO: bytesize/main-dotdot-server
+      UI_REPO: bytesize/main-dotdot-ui
 
     steps:
       - name: Checkout Repository
@@ -82,8 +82,8 @@ jobs:
 
     env:
       ECR_REGISTRY: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com
-      SERVER_REPO: bytesize/single-dotdot-server
-      UI_REPO: bytesize/single-dotdot-ui
+      SERVER_REPO: bytesize/main-dotdot-server
+      UI_REPO: bytesize/main-dotdot-ui
       CVAT_POSTGRES_PASSWORD: ${{ secrets.CVAT_POSTGRES_PASSWORD }}
 
     steps:
@@ -99,14 +99,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          DEPLOY_PATH: ${{ secrets.SINGLE_EC2_DEPLOY_PATH }}
-          CVAT_HOST: ${{ secrets.SINGLE_EC2_HOST }}
-          LE_EMAIL: ${{ secrets.SINGLE_LE_EMAIL }}
+          DEPLOY_PATH: ${{ secrets.MAIN_EC2_DEPLOY_PATH }}
+          CVAT_HOST: ${{ secrets.MAIN_EC2_HOST }}
+          LE_EMAIL: ${{ secrets.MAIN_LE_EMAIL }}
 
         with:
-          host: ${{ secrets.SINGLE_EC2_HOST }}
-          username: ${{ secrets.SINGLE_EC2_USER }}
-          key: ${{ secrets.SINGLE_EC2_SSH_KEY }}
+          host: ${{ secrets.MAIN_EC2_HOST }}
+          username: ${{ secrets.MAIN_EC2_USER }}
+          key: ${{ secrets.MAIN_EC2_SSH_KEY }}
           envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST,LE_EMAIL,CVAT_POSTGRES_PASSWORD
           script: |
             set -euo pipefail
@@ -163,14 +163,14 @@ jobs:
       - name: Health Check
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SINGLE_EC2_HOST }}
-          username: ${{ secrets.SINGLE_EC2_USER }}
-          key: ${{ secrets.SINGLE_EC2_SSH_KEY }}
+          host: ${{ secrets.MAIN_EC2_HOST }}
+          username: ${{ secrets.MAIN_EC2_USER }}
+          key: ${{ secrets.MAIN_EC2_SSH_KEY }}
           script: |
             echo "⏳ 서비스 초기화 대기 중 (60초)..."
             sleep 60
 
-            CVAT_HOST="${{ secrets.SINGLE_EC2_HOST }}"
+            CVAT_HOST="${{ secrets.MAIN_EC2_HOST }}"
 
             for i in $(seq 1 6); do
               STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \

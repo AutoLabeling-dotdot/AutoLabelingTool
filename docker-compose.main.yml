@@ -1,0 +1,163 @@
+# AWS Public Dev 서버용 Docker Compose override 파일
+#
+# 사용법:
+#   docker compose -f docker-compose.yml -f docker-compose.main.yml [command]
+#
+# 이 파일은 docker-compose.yml에서 아래 항목만 변경합니다:
+#   1. 모든 서버/UI 서비스의 image → ECR URI
+#   2. Traefik → HTTPS (Let's Encrypt) + HTTP→HTTPS 리다이렉트
+#   3. cvat_server / cvat_ui 라우터 → websecure 엔트리포인트
+
+x-rds-env: &rds-env
+  CVAT_POSTGRES_HOST: main-dotdot-rds.cdisuc2aaj7u.ap-northeast-2.rds.amazonaws.com
+  CVAT_POSTGRES_PORT: 5432
+  CVAT_POSTGRES_USER: dotdotadmin
+  CVAT_POSTGRES_PASSWORD: ${CVAT_POSTGRES_PASSWORD}
+  CVAT_POSTGRES_DB: cvat
+
+services:
+  cvat_server:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+    labels:
+      traefik.enable: 'true'
+      traefik.http.services.cvat.loadbalancer.server.port: '8080'
+      traefik.http.routers.cvat.rule: "Host(`${CVAT_HOST:-localhost}`) && (PathPrefix(`/api/`) || PathPrefix(`/static/`) || PathPrefix(`/admin`) || PathPrefix(`/django-rq`))"
+      traefik.http.routers.cvat.entrypoints: websecure
+      traefik.http.routers.cvat.tls.certresolver: letsencrypt
+
+  cvat_worker_utils:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_import:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_export:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_annotation:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_webhooks:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_quality_reports:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_chunks:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_worker_consensus:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-server:latest
+    environment:
+      <<: *rds-env
+    volumes:
+      - /data/cvat/data:/home/django/data
+      - /data/cvat/keys:/home/django/keys
+      - /data/cvat/logs:/home/django/logs
+
+  cvat_ui:
+    image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-ui:latest
+    labels:
+      traefik.enable: 'true'
+      traefik.http.services.cvat-ui.loadbalancer.server.port: '8000'
+      traefik.http.routers.cvat-ui.rule: "Host(`${CVAT_HOST:-localhost}`)"
+      traefik.http.routers.cvat-ui.entrypoints: websecure
+      traefik.http.routers.cvat-ui.tls.certresolver: letsencrypt
+
+  traefik:
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CVAT_HOST: ${CVAT_HOST}
+      DJANGO_LOG_VIEWER_HOST: grafana
+      DJANGO_LOG_VIEWER_PORT: 3000
+
+      # 액세스 로그 설정 (기존 유지)
+      TRAEFIK_ACCESSLOG_FORMAT: json
+      TRAEFIK_ACCESSLOG_FIELDS_DEFAULTMODE: drop
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_ClientHost: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_DownstreamContentSize: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_DownstreamStatus: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_Duration: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_RequestHost: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_RequestMethod: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_RequestPath: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_RequestPort: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_RequestProtocol: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_RouterName: keep
+      TRAEFIK_ACCESSLOG_FIELDS_NAMES_StartUTC: keep
+      TRAEFIK_LOG_FORMAT: json
+
+      TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: 'false'
+      TRAEFIK_PROVIDERS_DOCKER_NETWORK: cvat
+      TRAEFIK_PROVIDERS_FILE_DIRECTORY: /etc/traefik/rules
+
+      # HTTP 엔트리포인트 (port 80) → HTTPS 리다이렉트
+      TRAEFIK_ENTRYPOINTS_web_ADDRESS: :80
+      TRAEFIK_ENTRYPOINTS_web_HTTP_REDIRECTIONS_ENTRYPOINT_TO: websecure
+      TRAEFIK_ENTRYPOINTS_web_HTTP_REDIRECTIONS_ENTRYPOINT_SCHEME: https
+
+      # HTTPS 엔트리포인트 (port 443)
+      TRAEFIK_ENTRYPOINTS_websecure_ADDRESS: :443
+
+      # Let's Encrypt 자동 인증서 발급
+      TRAEFIK_CERTIFICATESRESOLVERS_letsencrypt_ACME_EMAIL: ${LE_EMAIL}
+      TRAEFIK_CERTIFICATESRESOLVERS_letsencrypt_ACME_STORAGE: /letsencrypt/acme.json
+      TRAEFIK_CERTIFICATESRESOLVERS_letsencrypt_ACME_HTTPCHALLENGE: "true"
+      TRAEFIK_CERTIFICATESRESOLVERS_letsencrypt_ACME_HTTPCHALLENGE_ENTRYPOINT: web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./components/analytics/grafana_conf.yml:/etc/traefik/rules/grafana_conf.yml:ro
+      - traefik_letsencrypt:/letsencrypt
+
+volumes:
+  traefik_letsencrypt:
