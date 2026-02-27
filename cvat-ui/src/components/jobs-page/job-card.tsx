@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import Card from 'antd/lib/card';
 import Descriptions from 'antd/lib/descriptions';
+import Progress from 'antd/lib/progress';
 import { MoreOutlined } from '@ant-design/icons';
 
 import { Job, JobType } from 'cvat-core-wrapper';
@@ -21,7 +22,7 @@ const useCardHeight = useCardHeightHOC({
     siblingClassNames: ['cvat-jobs-page-pagination', 'cvat-jobs-page-top-bar'],
     paddings: 80,
     minHeight: 200,
-    numberOfRows: 3,
+    numberOfRows: 2,
 });
 
 interface Props {
@@ -88,7 +89,7 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                                 previewClassName='cvat-jobs-page-job-item-card-preview'
                             />
                             <div className='cvat-job-page-list-item-id'>
-                        ID:
+                                ID:
                                 {` ${job.id}`}
                             </div>
                             {tag && <div className='cvat-job-page-list-item-type'>{tag}</div>}
@@ -101,7 +102,10 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                     <Descriptions column={1} size='small'>
                         <Descriptions.Item label='Task'>{job.taskName}</Descriptions.Item>
                         <Descriptions.Item label='Stage and state'>{`${job.stage} ${job.state}`}</Descriptions.Item>
-                        <Descriptions.Item label='Frames'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
+                        {/* Frames 항목은 progress bar 섹션으로 대체 - save 이력 있을 때 */}
+                        {job.annotationProgress == null && (
+                            <Descriptions.Item label='Frames'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
+                        )}
                         <Descriptions.Item label='Created'>{new Date(job.createdDate).toLocaleDateString()}</Descriptions.Item>
                         {job.assignee ? (
                             <Descriptions.Item label='Assignee'>{job.assignee.username}</Descriptions.Item>
@@ -109,6 +113,21 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                             <Descriptions.Item label='Assignee'> </Descriptions.Item>
                         )}
                     </Descriptions>
+                    {/* Save 이력이 있을 때만 progress bar 섹션 표시 */}
+                    {job.annotationProgress != null && (
+                        <div className='cvat-job-card-progress-section'>
+                            <div className='cvat-job-card-progress-info'>
+                                <span>{`Frame ${job.lastFrame} / ${job.stopFrame - job.startFrame + 1}`}</span>
+                                <span>{`${job.annotationProgress}%`}</span>
+                            </div>
+                            <Progress
+                                percent={job.annotationProgress}
+                                showInfo={false}
+                                strokeColor='#1890ff'
+                                size='small'
+                            />
+                        </div>
+                    )}
                     <div
                         onClick={handleContextMenuClick}
                         className='cvat-job-card-more-button cvat-actions-menu-button'

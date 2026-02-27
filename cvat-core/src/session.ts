@@ -536,6 +536,8 @@ export class Job extends Session {
         target_storage: Storage,
         parent_job_id: number | null;
         consensus_replicas: number;
+        // Save 버튼 클릭 시 FE에서 BE로 전달되는 마지막 프레임 번호
+        last_frame: number | null;
     };
 
     constructor(initialData: InitializerType) {
@@ -566,6 +568,8 @@ export class Job extends Session {
             target_storage: undefined,
             parent_job_id: null,
             consensus_replicas: undefined,
+            // Save하기 전에는 null로 초기화
+            last_frame: null,
         };
 
         this.#data.id = initialData.id ?? this.#data.id;
@@ -583,6 +587,10 @@ export class Job extends Session {
         this.#data.created_date = initialData.created_date ?? this.#data.created_date;
         this.#data.parent_job_id = initialData.parent_job_id ?? this.#data.parent_job_id;
         this.#data.consensus_replicas = initialData.consensus_replicas ?? this.#data.consensus_replicas;
+        // last_frame은 undefined는 무시, null은 '새 저장 없음' 의미로 유지
+        if (initialData.last_frame !== undefined) {
+            this.#data.last_frame = initialData.last_frame;
+        }
 
         if (Array.isArray(initialData.labels)) {
             this.#data.labels = initialData.labels.map((labelData) => {
@@ -637,6 +645,10 @@ export class Job extends Session {
         this.#data.guide_id = data.guide_id ?? this.#data.guide_id;
         this.#data.updated_date = data.updated_date ?? this.#data.updated_date;
         this.#data.bug_tracker = data.bug_tracker ?? this.#data.bug_tracker;
+        // reinit 시에도 last_frame 동기화 (save 후 응답에서 갱신)
+        if (data.last_frame !== undefined) {
+            this.#data.last_frame = data.last_frame;
+        }
 
         // TODO: labels also may get changed, but it will affect many code within the application
         // so, need to think on this additionally
@@ -728,6 +740,21 @@ export class Job extends Session {
 
     public get updatedDate(): string {
         return this.#data.updated_date;
+    }
+
+    // Save 버튼으로 저장된 마지막 프레임 번호. null이면 아직 Save한 적 없는 Job
+    public get lastFrame(): number | null {
+        return this.#data.last_frame;
+    }
+
+    // last_frame 기반으로 계산한 진행율 (0~100, 정수). null이면 미표시
+    public get annotationProgress(): number | null {
+        if (this.#data.last_frame == null) return null;
+        const totalFrames = this.#data.stop_frame - this.#data.start_frame + 1;
+        if (totalFrames <= 0) return null;
+        return Math.round(
+            ((this.#data.last_frame - this.#data.start_frame + 1) / totalFrames) * 100
+        );
     }
 
     public get sourceStorage(): Storage {
@@ -955,6 +982,8 @@ export class Task extends Session {
                     source_storage: initialData.source_storage,
                     parent_job_id: job.parent_job_id,
                     consensus_replicas: job.consensus_replicas,
+                    // Task API 응답의 embedded jobs에도 last_frame 전달 (job-item 진행율 표시용)
+                    last_frame: job.last_frame,
                 });
                 data.jobs.push(jobInstance);
             }

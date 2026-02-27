@@ -789,7 +789,9 @@ class JobReadSerializer(serializers.ModelSerializer):
             'data_chunk_size', 'data_compressed_chunk_type', 'data_original_chunk_type',
             'created_date', 'updated_date', 'issues', 'labels', 'type', 'organization',
             'target_storage', 'source_storage', 'assignee_updated_date', 'parent_job_id',
-            'consensus_replicas'
+            'consensus_replicas',
+            # Save 시점에 저장된 마지막 프레임 번호 (진행율 계산용)
+            'last_frame',
         )
         read_only_fields = fields
         list_serializer_class = JobReadListSerializer
@@ -894,7 +896,8 @@ class JobWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
         manual_selection_params = ('frames',)
         write_once_fields = ('type', 'task_id', 'frame_selection_method',) \
             + random_selection_params + manual_selection_params
-        fields = ('assignee', 'stage', 'state', ) + write_once_fields
+        # last_frame은 PATCH 요청에서 업데이트 가능 (write_once_fields에 포함하지 않음)
+        fields = ('assignee', 'stage', 'state', 'last_frame',) + write_once_fields
 
     def to_representation(self, instance):
         serializer = JobReadSerializer(instance, context=self.context)

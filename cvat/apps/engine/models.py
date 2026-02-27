@@ -945,6 +945,11 @@ class Job(TimestampedModel, AssignableModel, FileSystemRelatedModel):
         related_name='child_jobs', related_query_name="child_job"
     )
 
+    # 작업자가 마지막으로 Save한 시점의 프레임 번호.
+    # Save 버튼 클릭 시 FE에서 전달하여 저장하며, 진행율 계산에 사용됨.
+    # null: 아직 한 번도 Save한 적 없는 Job
+    last_frame = models.PositiveIntegerField(null=True, blank=True, default=None)
+
     labeledimage_set: models.manager.RelatedManager[LabeledImage]
     labeledshape_set: models.manager.RelatedManager[LabeledShape]
     labeledtrack_set: models.manager.RelatedManager[LabeledTrack]

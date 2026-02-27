@@ -85,6 +85,15 @@
         top: $grid-unit-size * 6.5;
     }
 
+    // Save 이력이 있을 때 표시되는 하단 progress bar 섹션
+    .cvat-job-item-progress-section {
+        margin-top: $grid-unit-size * 1.5;
+
+        .ant-progress {
+            margin-top: $grid-unit-size * 0.5;
+        }
+    }
+
 }
 
 .ant-menu.cvat-job-item-menu {

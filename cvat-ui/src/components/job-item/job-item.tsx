@@ -20,6 +20,7 @@ import {
     LoadingOutlined, MoreOutlined, QuestionCircleOutlined,
 } from '@ant-design/icons/lib/icons';
 import { DurationIcon, FramesIcon } from 'icons';
+import Progress from 'antd/lib/progress';
 import {
     Job, JobStage, JobState, JobType, Task, User,
 } from 'cvat-core-wrapper';
@@ -55,7 +56,7 @@ function ReviewSummaryComponent({ jobInstance }: Readonly<{ jobInstance: Job }>)
     useEffect(() => {
         setError(null);
         jobInstance
-            .issues(jobInstance.id)
+            .issues()
             .then((issues: any[]) => {
                 if (isMounted()) {
                     setSummary({
@@ -284,6 +285,28 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                     </Row>
                 </Col>
             </Row>
+            {/* Save 이력이 있을 때만 하단 progress bar 섹션 표시 */}
+            {job.annotationProgress != null && (
+                <div className='cvat-job-item-progress-section'>
+                    <Row justify='space-between' align='middle'>
+                        <Col>
+                            <Text type='secondary'>
+                                {/* 마지막 작업 프레임 번호와 전체 프레임 범위를 함께 표시 */}
+                                {`Frame ${job.lastFrame} / ${job.stopFrame}`}
+                            </Text>
+                        </Col>
+                        <Col>
+                            <Text type='secondary'>{`${job.annotationProgress}%`}</Text>
+                        </Col>
+                    </Row>
+                    <Progress
+                        percent={job.annotationProgress}
+                        showInfo={false}
+                        strokeColor='#1890ff'
+                        size='small'
+                    />
+                </div>
+            )}
             <div
                 onClick={handleContextMenuClick}
                 className='cvat-job-item-more-button cvat-actions-menu-button'
