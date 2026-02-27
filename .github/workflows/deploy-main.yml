@@ -141,20 +141,20 @@ jobs:
             echo "🐳 최신 이미지 pull..."
             docker compose \
               -f docker-compose.yml \
-              -f docker-compose.single.yml \
+              -f docker-compose.main.yml \
               pull
 
             echo "🗄️ DB 마이그레이션 실행..."
             # init subcommand: DB 연결 대기 + migrate + redis migrate 자동 처리
             docker compose \
               -f docker-compose.yml \
-              -f docker-compose.single.yml \
+              -f docker-compose.main.yml \
               run --rm cvat_server init
 
             echo "🚀 서비스 기동..."
             docker compose \
               -f docker-compose.yml \
-              -f docker-compose.single.yml \
+              -f docker-compose.main.yml \
               up -d
 
             echo "✅ 배포 완료!"
