@@ -47,9 +47,9 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.build.yml build
 
           echo "🗄️ DB 마이그레이션 실행..."
-          # 인자 없이 실행 → 미적용된 모든 migration을 자동으로 반영
+          # init subcommand: DB 연결 대기 + migrate + redis migrate 자동 처리
           docker compose -f docker-compose.yml -f docker-compose.build.yml \
-            run --rm cvat_server python manage.py migrate
+            run --rm cvat_server init
 
           echo "🚀 Starting services..."
           export CVAT_HOST=172.16.0.172
