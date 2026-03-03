@@ -117,13 +117,13 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                     {job.annotationProgress != null && (
                         <div className='cvat-job-card-progress-section'>
                             <div className='cvat-job-card-progress-info'>
-                                <span>{`Frame ${job.lastFrame} / ${job.stopFrame - job.startFrame + 1}`}</span>
+                                <span>{`Frame ${job.lastFrame - job.startFrame + 1} / ${job.stopFrame - job.startFrame + 1}`}</span>
                                 <span>{`${job.annotationProgress}%`}</span>
                             </div>
                             <Progress
                                 percent={job.annotationProgress}
                                 showInfo={false}
-                                strokeColor='#1890ff'
+                                strokeColor='#000000'
                                 size='small'
                             />
                         </div>
