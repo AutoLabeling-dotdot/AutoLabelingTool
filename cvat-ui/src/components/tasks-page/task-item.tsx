@@ -221,7 +221,6 @@ class TaskItemComponent extends React.PureComponent<TaskItemProps & RouteCompone
                                 percent: (numOfCompleted * 100) / numOfJobs,
                             }}
                             strokeColor='#1890FF'
-                            trailColor='#FAAD14'
                             showInfo={false}
                             size='small'
                         />

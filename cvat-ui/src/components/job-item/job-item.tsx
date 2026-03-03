@@ -292,7 +292,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                         <Col>
                             <Text type='secondary'>
                                 {/* 마지막 작업 프레임 번호와 전체 프레임 범위를 함께 표시 */}
-                                {`Frame ${job.lastFrame} / ${job.stopFrame}`}
+                                {`Frame ${job.lastFrame - job.startFrame + 1} / ${job.stopFrame - job.startFrame + 1}`}
                             </Text>
                         </Col>
                         <Col>
@@ -302,7 +302,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                     <Progress
                         percent={job.annotationProgress}
                         showInfo={false}
-                        strokeColor='#1890ff'
+                        strokeColor='#000000'
                         size='small'
                     />
                 </div>
