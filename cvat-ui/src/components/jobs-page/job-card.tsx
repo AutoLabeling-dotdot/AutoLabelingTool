@@ -39,7 +39,7 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
 
     const history = useHistory();
     const height = useCardHeight();
-    const { itemRef, handleContextMenuClick } = useContextMenuClick<HTMLDivElement>();
+    const { itemRef, handleContextMenuClick, handleContextMenuCapture } = useContextMenuClick<HTMLDivElement>();
     const handleCardClick = useCallback((event: React.MouseEvent): void => {
         const cancel = onClick(event);
         if (!cancel) {
