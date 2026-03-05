@@ -114,7 +114,7 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                         )}
                     </Descriptions>
                     {/* Save 이력이 있을 때만 progress bar 섹션 표시 */}
-                    {job.annotationProgress != null && (
+                    {job.annotationProgress != null && job.lastFrame != null && (
                         <div className='cvat-job-card-progress-section'>
                             <div className='cvat-job-card-progress-info'>
                                 <span>{`Frame ${job.lastFrame - job.startFrame + 1} / ${job.stopFrame - job.startFrame + 1}`}</span>

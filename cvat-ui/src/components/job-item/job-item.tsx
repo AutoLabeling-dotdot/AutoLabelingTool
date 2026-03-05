@@ -287,7 +287,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                 </Col>
             </Row>
             {/* Save 이력이 있을 때만 하단 progress bar 섹션 표시 */}
-            {job.annotationProgress != null && (
+            {job.annotationProgress != null && job.lastFrame != null && (
                 <div className='cvat-job-item-progress-section'>
                     <Row justify='space-between' align='middle'>
                         <Col>
