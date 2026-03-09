@@ -878,6 +878,9 @@ export interface AnnotationState {
         playing: boolean;
         frameAngles: number[];
         hoveredChapter: number | null;
+        preloading: {
+            active: boolean;
+        };
     };
     drawing: {
         activeInteractor?: MLModel | OpenCVTool;
