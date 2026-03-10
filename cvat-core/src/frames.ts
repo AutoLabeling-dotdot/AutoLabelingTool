@@ -35,6 +35,7 @@ const frameDataCache: Record<string, {
         timestamp: number;
         size: number;
     }>;
+    compressedChunks: Record<number, ArrayBuffer>;
     getChunk: (chunkIndex: number, quality: ChunkQuality) => Promise<ArrayBuffer>;
     getMeta: () => Promise<FramesMetaData>;
 }> = {};
@@ -770,6 +771,7 @@ async function refreshJobCacheIfOutdated(jobID: number): Promise<void> {
             // currently we only re-write meta, remove all cached frames from provider and clear cached context images
             // other parameters (e.g. chunkSize) are not supposed to be changed
             cached.provider.cleanup(Number.MAX_SAFE_INTEGER);
+            cached.compressedChunks = {};
             for (const frame of Object.keys(cached.contextCache)) {
                 for (const image of Object.values(cached.contextCache[+frame].data)) {
                     // close images to immediate memory release
@@ -936,7 +938,20 @@ export async function getFrame(
             latestFrameDecodeRequest: null,
             latestContextImagesRequest: null,
             contextCache: {},
-            getChunk,
+            compressedChunks: {},
+            getChunk: async (chunkIndex: number, quality: ChunkQuality): Promise<ArrayBuffer> => {
+                if (
+                    quality === ChunkQuality.COMPRESSED &&
+                    chunkIndex in frameDataCache[jobID].compressedChunks
+                ) {
+                    return frameDataCache[jobID].compressedChunks[chunkIndex];
+                }
+                const chunk = await getChunk(chunkIndex, quality);
+                if (quality === ChunkQuality.COMPRESSED) {
+                    frameDataCache[jobID].compressedChunks[chunkIndex] = chunk;
+                }
+                return chunk;
+            },
             getMeta: () => {
                 const cached = frameMetaCache[jobID];
                 if (!(cached instanceof Promise)) {
@@ -1051,12 +1066,21 @@ export async function findFrame(
     return lastUndeletedFrame;
 }
 
+export async function preloadChunk(jobID: number, chunkIndex: number): Promise<void> {
+    if (!(jobID in frameDataCache)) return;
+    const cache = frameDataCache[jobID];
+    if (chunkIndex in cache.compressedChunks) return;
+    await cache.getChunk(chunkIndex, ChunkQuality.COMPRESSED);
+}
+
 export function getCachedChunks(jobID: number): number[] {
     if (!(jobID in frameDataCache)) {
         return [];
     }
 
-    return frameDataCache[jobID].provider.cachedChunks(true);
+    const decoded = frameDataCache[jobID].provider.cachedChunks(true);
+    const compressed = Object.keys(frameDataCache[jobID].compressedChunks).map(Number);
+    return [...new Set([...decoded, ...compressed])].sort((a, b) => a - b);
 }
 
 export async function getJobFrameNumbers(jobID: number): Promise<number[]> {
