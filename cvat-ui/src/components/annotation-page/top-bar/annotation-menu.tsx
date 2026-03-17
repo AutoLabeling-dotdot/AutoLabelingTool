@@ -15,6 +15,7 @@ import Dropdown from 'antd/lib/dropdown';
 import Button from 'antd/lib/button';
 import message from 'antd/lib/message';
 import Icon from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
 import { MenuProps } from 'antd/lib/menu';
 
 import { MainMenuIcon } from 'icons';
@@ -26,6 +27,7 @@ import { openAnnotationsActionModal } from 'components/annotation-page/annotatio
 import { CombinedState } from 'reducers';
 import {
     finishCurrentJobAsync,
+    preloadDataAsync,
     removeAnnotationsAsync as removeAnnotationsAsyncAction,
 } from 'actions/annotation-actions';
 import { exportActions } from 'actions/export-actions';
@@ -36,6 +38,7 @@ export enum Actions {
     LOAD_JOB_ANNO = 'load_job_anno',
     EXPORT_JOB_DATASET = 'export_job_dataset',
     REMOVE_ANNOTATIONS = 'remove_annotations',
+    PRELOAD_DATA = 'preload_data',
     RUN_ACTIONS = 'run_actions',
     OPEN_TASK = 'open_task',
     FINISH_JOB = 'finish_job',
@@ -45,6 +48,7 @@ function AnnotationMenuComponent(): JSX.Element {
     const dispatch = useDispatch();
     const history = useHistory();
     const jobInstance = useSelector((state: CombinedState) => state.annotation.job.instance as Job);
+    const isPreloading = useSelector((state: CombinedState) => state.annotation.player.preloading.active);
     const [jobState, setJobState] = useState(jobInstance.state);
     const pluginActions = usePlugins(
         (state: CombinedState) => state.plugins.components.annotationPage.menuActions.items,
@@ -182,6 +186,14 @@ function AnnotationMenuComponent(): JSX.Element {
             });
         },
     }, 30]);
+
+    menuItems.push([{
+        key: Actions.PRELOAD_DATA,
+        label: isPreloading
+            ? <><LoadingOutlined style={{ marginRight: 8 }} />Cancel preload</>
+            : 'Preload data',
+        onClick: () => { dispatch(preloadDataAsync()); },
+    }, 35]);
 
     menuItems.push([{
         key: Actions.RUN_ACTIONS,

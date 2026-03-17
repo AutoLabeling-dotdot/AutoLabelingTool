@@ -174,6 +174,16 @@ export enum AnnotationActionTypes {
     UPDATE_BRUSH_TOOLS_CONFIG = 'UPDATE_BRUSH_TOOLS_CONFIG',
     HIGHLIGHT_CONFLICT = 'HIGHLIGHT_CONFCLICT',
     HOVERED_CHAPTER = 'HOVERED_CHAPTER',
+    PRELOAD_DATA_START = 'PRELOAD_DATA_START',
+    PRELOAD_DATA_STOP = 'PRELOAD_DATA_STOP',
+}
+
+function startPreloadData(): AnyAction {
+    return { type: AnnotationActionTypes.PRELOAD_DATA_START, payload: {} };
+}
+
+function stopPreloadData(): AnyAction {
+    return { type: AnnotationActionTypes.PRELOAD_DATA_STOP, payload: {} };
 }
 
 export function setHoveredChapter(id: number | null): AnyAction {
@@ -1784,6 +1794,44 @@ export function updateEditedStateAsync(objectState: ObjectState | null): ThunkAc
         const { activeObjectHidden } = state.annotation.canvas;
         if (activeObjectHidden !== newActiveObjectHidden) {
             dispatch(changeHideActiveObjectAsync(newActiveObjectHidden));
+        }
+    };
+}
+
+export function preloadDataAsync(): ThunkAction {
+    return async (dispatch: ThunkDispatch, getState: () => CombinedState): Promise<void> => {
+        const state = getState();
+        const { active } = state.annotation.player.preloading;
+
+        if (active) {
+            dispatch(stopPreloadData());
+            return;
+        }
+
+        const job = state.annotation.job.instance as Job;
+        const { frameNumbers } = state.annotation.job;
+        if (!job || !frameNumbers.length) return;
+
+        dispatch(startPreloadData());
+
+        const { dataChunkSize, frameCount } = job;
+        const totalChunks = Math.ceil(frameCount / dataChunkSize);
+
+        try {
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                if (!getState().annotation.player.preloading.active) break;
+
+                try {
+                    await job.frames.preload(chunkIndex);
+                } catch {
+                    // ignore individual chunk failures
+                }
+
+                await dispatch(updateCachedChunksAsync());
+            }
+        } finally {
+            dispatch(stopPreloadData());
+            await dispatch(updateCachedChunksAsync());
         }
     };
 }

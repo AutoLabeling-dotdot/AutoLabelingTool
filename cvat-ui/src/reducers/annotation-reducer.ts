@@ -106,6 +106,9 @@ const defaultState: AnnotationState = {
         frameAngles: [],
         navigationBlocked: false,
         hoveredChapter: null,
+        preloading: {
+            active: false,
+        },
     },
     drawing: {
         activeShapeType: ShapeType.RECTANGLE,
@@ -300,6 +303,24 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 player: {
                     ...state.player,
                     hoveredChapter: action.payload.id,
+                },
+            };
+        }
+        case AnnotationActionTypes.PRELOAD_DATA_START: {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    preloading: { active: true },
+                },
+            };
+        }
+        case AnnotationActionTypes.PRELOAD_DATA_STOP: {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    preloading: { active: false },
                 },
             };
         }

@@ -18,6 +18,7 @@ import {
     deleteFrame,
     restoreFrame,
     getCachedChunks,
+    preloadChunk,
     getJobFrameNumbers,
     getFramesMeta,
     clear as clearFrames,
@@ -261,6 +262,16 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
         ): ReturnType<typeof JobClass.prototype.frames.cachedChunks> {
             return Promise.resolve(getCachedChunks(this.id));
         },
+    });
+
+    Object.defineProperty(Job.prototype.frames.preload, 'implementation', {
+        value: function preloadImplementation(
+            this: JobClass,
+            chunkIndex: number,
+        ): ReturnType<typeof JobClass.prototype.frames.preload> {
+            return preloadChunk(this.id, chunkIndex);
+        },
+        writable: true,
     });
 
     Object.defineProperty(Job.prototype.frames.frameNumbers, 'implementation', {
