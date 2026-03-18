@@ -31,7 +31,6 @@ import SearchFramesModal from './top-bar/search-modal';
 interface Props {
     job: Job | null | undefined;
     fetching: boolean;
-    annotationsInitialized: boolean;
     frameNumber: number;
     workspace: Workspace;
     getJob(): void;
@@ -42,7 +41,7 @@ interface Props {
 
 export default function AnnotationPageComponent(props: Props): JSX.Element {
     const {
-        job, fetching, annotationsInitialized, workspace, frameNumber,
+        job, fetching, workspace, frameNumber,
         getJob, closeJob, saveLogs, changeFrame,
     } = props;
     const prevJob = usePrevious(job);
@@ -136,7 +135,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
         }
     }, [job, workspace]);
 
-    if (job === null || !annotationsInitialized) {
+    if (job === null) {
         return <Spin size='large' className='cvat-spinner' />;
     }
 
