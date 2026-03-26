@@ -1021,15 +1021,6 @@ export function getJobAsync({
             const frameData = await job.frames.get(frameNumber);
             const jobMeta = await cvat.frames.getMeta('job', job.id);
             const frameNumbers = await job.frames.frameNumbers();
-            try {
-                // call first getting of frame data before rendering interface
-                // to load and decode first chunk
-                await frameData.data();
-            } catch (error) {
-                // do nothing, user will be notified when data request is done
-            }
-
-            await job.annotations.clear({ reload: true });
 
             const issues = await job.issues();
             const colors = [...cvat.enums.colors];
@@ -1037,7 +1028,6 @@ export function getJobAsync({
             let groundTruthJobFramesMeta = null;
             let validationLayout = null;
             if (gtJob) {
-                await gtJob.annotations.clear({ reload: true }); // fetch gt annotations from the server
                 groundTruthJobFramesMeta = await cvat.frames.getMeta('job', gtJob.id);
                 validationLayout = await job.validationLayout();
             }
@@ -1050,7 +1040,7 @@ export function getJobAsync({
                 }
             }
 
-            await job.logger.log(EventScope.loadJob, { duration: Date.now() - start });
+            const loadDuration = Date.now() - start;
 
             const openTime = Date.now();
             dispatch({
@@ -1075,6 +1065,23 @@ export function getJobAsync({
                 },
             });
 
+            // Deferred tasks: UI is already rendering, don't dispatch GET_JOB_FAILED on error
+            // fire-and-forget preload & logging
+            frameData.data().catch(() => {});
+            job.logger.log(EventScope.loadJob, { duration: loadDuration }).catch(() => {});
+
+            // Annotation cache warmup (best-effort)
+            try {
+                await job.annotations.clear({ reload: true });
+                if (gtJob) {
+                    await gtJob.annotations.clear({ reload: true });
+                }
+            } catch (deferredError) {
+                console.error('Annotation cache warmup failed:', deferredError);
+            }
+
+            // Always dispatch regardless of cache warmup result
+            // fetchAnnotationsAsync internally falls back to server fetch on cache miss
             dispatch(fetchAnnotationsAsync());
             dispatch(changeFrameAsync(frameNumber, false));
         } catch (error) {

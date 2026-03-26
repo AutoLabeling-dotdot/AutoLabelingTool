@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Layout from 'antd/lib/layout';
 import Spin from 'antd/lib/spin';
 import notification from 'antd/lib/notification';
@@ -27,26 +27,31 @@ import EventRecorder from 'utils/event-recorder';
 import { readLatestFrame } from 'utils/remember-latest-frame';
 import { EventScope } from 'cvat-core/src/enums';
 import SearchFramesModal from './top-bar/search-modal';
+import PreloadModal from './top-bar/preload-modal';
 
 interface Props {
     job: Job | null | undefined;
     fetching: boolean;
-    annotationsInitialized: boolean;
     frameNumber: number;
     workspace: Workspace;
+    isPreloading: boolean;
     getJob(): void;
     saveLogs(): void;
     closeJob(): void;
     changeFrame(frame: number): void;
+    startPreload(): void;
+    cancelPreload(): void;
 }
 
 export default function AnnotationPageComponent(props: Props): JSX.Element {
     const {
-        job, fetching, annotationsInitialized, workspace, frameNumber,
-        getJob, closeJob, saveLogs, changeFrame,
+        job, fetching, workspace, frameNumber, isPreloading,
+        getJob, closeJob, saveLogs, changeFrame, startPreload, cancelPreload,
     } = props;
     const prevJob = usePrevious(job);
     const prevFetching = usePrevious(fetching);
+    const [preloadModalVisible, setPreloadModalVisible] = useState(false);
+    const autoPreloadTriggered = useRef(false);
 
     useEffect(() => {
         saveLogs();
@@ -136,7 +141,16 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
         }
     }, [job, workspace]);
 
-    if (job === null || !annotationsInitialized) {
+    // Auto-trigger preload once when job is first loaded
+    useEffect(() => {
+        if (prevFetching && !fetching && !prevJob && job && !autoPreloadTriggered.current) {
+            autoPreloadTriggered.current = true;
+            startPreload();
+            setPreloadModalVisible(true);
+        }
+    }, [job, fetching, prevJob, prevFetching]);
+
+    if (job === null) {
         return <Spin size='large' className='cvat-spinner' />;
     }
 
@@ -160,6 +174,14 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
             <FiltersModalComponent />
             <StatisticsModalComponent />
             <SearchFramesModal />
+            <PreloadModal
+                open={preloadModalVisible}
+                onClose={() => setPreloadModalVisible(false)}
+                onCancel={() => {
+                    cancelPreload();
+                    setPreloadModalVisible(false);
+                }}
+            />
         </Layout>
     );
 }
