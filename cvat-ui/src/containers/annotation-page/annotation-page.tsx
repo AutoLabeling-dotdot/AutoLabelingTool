@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router';
 import AnnotationPageComponent from 'components/annotation-page/annotation-page';
 import {
     getJobAsync, saveLogsAsync, changeFrameAsync,
-    closeJob as closeJobAction,
+    closeJob as closeJobAction, preloadDataAsync,
 } from 'actions/annotation-actions';
 
 import { CombinedState, Workspace } from 'reducers';
@@ -25,6 +25,7 @@ interface StateToProps {
     frameNumber: number;
     fetching: boolean;
     workspace: Workspace;
+    isPreloading: boolean;
 }
 
 interface DispatchToProps {
@@ -32,6 +33,8 @@ interface DispatchToProps {
     changeFrame(frame: number): void;
     saveLogs(): void;
     closeJob(): void;
+    startPreload(): void;
+    cancelPreload(): void;
 }
 
 function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
@@ -45,6 +48,9 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
                 frame: {
                     number: frameNumber,
                 },
+                preloading: {
+                    active: isPreloading,
+                },
             },
         },
     } = state;
@@ -54,6 +60,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         fetching,
         workspace,
         frameNumber,
+        isPreloading,
     };
 }
 
@@ -118,6 +125,13 @@ function mapDispatchToProps(dispatch: any, own: OwnProps): DispatchToProps {
         },
         changeFrame(frame: number): void {
             dispatch(changeFrameAsync(frame));
+        },
+        startPreload(): void {
+            dispatch(preloadDataAsync());
+        },
+        cancelPreload(): void {
+            // preloadDataAsync toggles: calling while active will stop it
+            dispatch(preloadDataAsync());
         },
     };
 }
