@@ -25,7 +25,6 @@ interface StateToProps {
     frameNumber: number;
     fetching: boolean;
     workspace: Workspace;
-    isPreloading: boolean;
 }
 
 interface DispatchToProps {
@@ -34,7 +33,6 @@ interface DispatchToProps {
     saveLogs(): void;
     closeJob(): void;
     startPreload(): void;
-    cancelPreload(): void;
 }
 
 function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
@@ -48,9 +46,6 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
                 frame: {
                     number: frameNumber,
                 },
-                preloading: {
-                    active: isPreloading,
-                },
             },
         },
     } = state;
@@ -60,7 +55,6 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         fetching,
         workspace,
         frameNumber,
-        isPreloading,
     };
 }
 
@@ -127,10 +121,6 @@ function mapDispatchToProps(dispatch: any, own: OwnProps): DispatchToProps {
             dispatch(changeFrameAsync(frame));
         },
         startPreload(): void {
-            dispatch(preloadDataAsync());
-        },
-        cancelPreload(): void {
-            // preloadDataAsync toggles: calling while active will stop it
             dispatch(preloadDataAsync());
         },
     };
