@@ -391,7 +391,7 @@ function BrushTools(): React.ReactPortal | null {
                     onChange={({ id: labelID }: { id: number }) => {
                         if (Number.isInteger(labelID)) {
                             dispatch(
-                                rememberObject({ activeLabelID: labelID }),
+                                rememberObject({ activeLabelID: labelID, activeShapeType: ShapeType.MASK }),
                             );
                         }
                     }}
