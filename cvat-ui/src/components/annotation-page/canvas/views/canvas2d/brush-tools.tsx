@@ -89,7 +89,7 @@ function BrushTools(): React.ReactPortal | null {
     const [currentTool, setCurrentTool] = useState<'brush' | 'eraser' | 'polygon-plus' | 'polygon-minus'>('brush');
     const [brushForm, setBrushForm] = useState<'circle' | 'square'>('circle');
     const [[top, left], setTopLeft] = useState([0, 0]);
-    const [brushSize, setBrushSize] = useState(10);
+    const [brushSize, setBrushSize] = useState(20);
     const [applicableLabels, setApplicableLabels] = useState<Label[]>([]);
 
     const [blockedTools, setBlockedTools] = useState<Record<'eraser' | 'polygon-minus', boolean>>({
@@ -391,7 +391,7 @@ function BrushTools(): React.ReactPortal | null {
                     onChange={({ id: labelID }: { id: number }) => {
                         if (Number.isInteger(labelID)) {
                             dispatch(
-                                rememberObject({ activeLabelID: labelID }),
+                                rememberObject({ activeLabelID: labelID, activeShapeType: ShapeType.MASK }),
                             );
                         }
                     }}
