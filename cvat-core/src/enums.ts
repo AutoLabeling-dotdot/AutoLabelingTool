@@ -24,6 +24,9 @@ export type ProjectStatus = TaskStatus;
 export enum JobStage {
     ANNOTATION = 'annotation',
     VALIDATION = 'validation',
+    VALIDATION1 = 'validation1',
+    VALIDATION2 = 'validation2',
+    VALIDATION3 = 'validation3',
     ACCEPTANCE = 'acceptance',
 }
 

@@ -32,7 +32,7 @@ jobs:
           echo "📥 Fresh checkout from GitHub..."
           git clone https://oauth2:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git AutoLabelingTool
           cd AutoLabelingTool
-          git checkout dev
+          git checkout develop
 
           echo "✅ Clean checkout completed!"
 

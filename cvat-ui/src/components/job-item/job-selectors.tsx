@@ -51,6 +51,15 @@ export function JobStageSelector({ value, onSelect }: Readonly<JobStageSelectorP
             <Select.Option value={JobStage.VALIDATION}>
                 {JobStage.VALIDATION}
             </Select.Option>
+            <Select.Option value={JobStage.VALIDATION1}>
+                {JobStage.VALIDATION1}
+            </Select.Option>
+            <Select.Option value={JobStage.VALIDATION2}>
+                {JobStage.VALIDATION2}
+            </Select.Option>
+            <Select.Option value={JobStage.VALIDATION3}>
+                {JobStage.VALIDATION3}
+            </Select.Option>
             <Select.Option value={JobStage.ACCEPTANCE}>
                 {JobStage.ACCEPTANCE}
             </Select.Option>

@@ -101,6 +101,9 @@ class LabelType(str, Enum):
 class StageChoice(str, Enum):
     ANNOTATION = 'annotation'
     VALIDATION = 'validation'
+    VALIDATION1 = 'validation1'
+    VALIDATION2 = 'validation2'
+    VALIDATION3 = 'validation3'
     ACCEPTANCE = 'acceptance'
 
     @classmethod
