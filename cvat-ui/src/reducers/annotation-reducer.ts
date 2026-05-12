@@ -202,7 +202,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             } = action.payload;
 
             const defaultLabel = job.labels.length ? job.labels[0] : null;
-            const isReview = job.stage === JobStage.VALIDATION;
+            const isReview = [JobStage.VALIDATION, JobStage.VALIDATION1, JobStage.VALIDATION2, JobStage.VALIDATION3].includes(job.stage);
             let workspaceSelected = null;
             let activeObjectType;
             let activeShapeType = null;

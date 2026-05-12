@@ -8355,11 +8355,17 @@ components:
       enum:
       - annotation
       - validation
+      - validation1
+      - validation2
+      - validation3
       - acceptance
       type: string
       description: |-
         * `annotation` - ANNOTATION
         * `validation` - VALIDATION
+        * `validation1` - VALIDATION1
+        * `validation2` - VALIDATION2
+        * `validation3` - VALIDATION3
         * `acceptance` - ACCEPTANCE
     JobStatus:
       enum:
