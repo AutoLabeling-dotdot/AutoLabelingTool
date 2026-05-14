@@ -1376,6 +1376,18 @@ export function splitAnnotationsAsync(state: CombinedState['annotation']['annota
     };
 }
 
+export function removeGroupAnnotationsAsync(groupId: number): ThunkAction {
+    return async (dispatch: ThunkDispatch): Promise<void> => {
+        const state: CombinedState = getStore().getState();
+        const groupStates = state.annotation.annotations.states.filter(
+            (_state: any): boolean => _state.group.id === groupId && !_state.lock,
+        );
+        for (const objectState of groupStates) {
+            await dispatch(removeObjectAsync(objectState, false));
+        }
+    };
+}
+
 export function changeGroupColorAsync(group: number, color: string): ThunkAction {
     return async (dispatch: ThunkDispatch): Promise<void> => {
         const state: CombinedState = getStore().getState();

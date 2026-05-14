@@ -30,6 +30,7 @@ interface Props {
     labels: any[];
     attributes: any[];
     jobInstance: any;
+    group: { id: number; color: string } | null;
     activate(activeElementID?: number): void;
     focusAndExpand(): void;
     copy(): void;
@@ -41,6 +42,7 @@ interface Props {
     toOneLayerBackward(): void;
     toOneLayerForward(): void;
     remove(): void;
+    removeGroup(): void;
     changeLabel(label: any): void;
     changeColor(color: string): void;
     resetCuboidPerspective(): void;
@@ -64,6 +66,7 @@ function ObjectItemComponent(props: Props): JSX.Element {
         labels,
         normalizedKeyMap,
         isGroundTruth,
+        group,
         activate,
         focusAndExpand,
         copy,
@@ -75,6 +78,7 @@ function ObjectItemComponent(props: Props): JSX.Element {
         toOneLayerForward,
         toOneLayerBackward,
         remove,
+        removeGroup,
         changeLabel,
         changeColor,
         resetCuboidPerspective,
@@ -130,10 +134,12 @@ function ObjectItemComponent(props: Props): JSX.Element {
                     changeColorShortcut={normalizedKeyMap.CHANGE_OBJECT_COLOR}
                     sliceShortcut={normalizedKeyMap.SWITCH_SLICE_MODE}
                     runAnnotationsActionShortcut={normalizedKeyMap.RUN_ANNOTATIONS_ACTION}
+                    group={group}
                     changeLabel={changeLabel}
                     changeColor={changeColor}
                     copy={copy}
                     remove={remove}
+                    removeGroup={removeGroup}
                     propagate={propagate}
                     createURL={createURL}
                     switchOrientation={switchOrientation}

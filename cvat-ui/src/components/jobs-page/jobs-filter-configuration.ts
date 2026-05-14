@@ -31,6 +31,9 @@ export const config: Partial<Config> = {
                 listValues: [
                     { value: 'annotation', title: 'annotation' },
                     { value: 'validation', title: 'validation' },
+                    { value: 'validation1', title: 'validation1' },
+                    { value: 'validation2', title: 'validation2' },
+                    { value: 'validation3', title: 'validation3' },
                     { value: 'acceptance', title: 'acceptance' },
                 ],
             },

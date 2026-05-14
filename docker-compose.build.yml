@@ -12,6 +12,10 @@ services:
       context: .
       dockerfile: Dockerfile
     image: cvat/server
+    environment:
+      CVAT_SERVERLESS: 1
+      CVAT_NUCLIO_HOST: ${NUCLIO_HOST}
+      CVAT_NUCLIO_INVOKE_METHOD: dashboard
 
   cvat_worker_utils:
     build:
@@ -36,6 +40,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: cvat/server
+    environment:
+      CVAT_NUCLIO_HOST: ${NUCLIO_HOST}
+      CVAT_NUCLIO_INVOKE_METHOD: dashboard
 
   cvat_worker_webhooks:
     build:

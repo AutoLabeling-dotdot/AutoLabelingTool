@@ -43,6 +43,7 @@ interface Props {
     changeColor(value: string): void;
     copy(): void;
     remove(): void;
+    removeGroup(): void;
     propagate(): void;
     createURL(): void;
     switchOrientation(): void;
@@ -56,6 +57,7 @@ interface Props {
     slice(): void;
     runAnnotationAction(): void;
     jobInstance: Job;
+    group: { id: number; color: string } | null;
 }
 
 interface ItemProps {
@@ -275,6 +277,21 @@ function RemoveItem(props: ItemProps): JSX.Element {
     );
 }
 
+function RemoveGroupItem(props: ItemProps): JSX.Element {
+    const { toolProps } = props;
+    const { removeGroup } = toolProps;
+    return (
+        <Button
+            type='link'
+            icon={<DeleteOutlined />}
+            onClick={removeGroup}
+            className='cvat-object-item-menu-remove-group'
+        >
+            Remove group
+        </Button>
+    );
+}
+
 function RunAnnotationActionItem(props: ItemProps): JSX.Element {
     const { toolProps } = props;
     const { runAnnotationsActionShortcut, runAnnotationAction } = toolProps;
@@ -294,7 +311,7 @@ function RunAnnotationActionItem(props: ItemProps): JSX.Element {
 
 export default function ItemMenu(props: Props): MenuProps {
     const {
-        locked, shapeType, objectType, colorBy, jobInstance,
+        locked, shapeType, objectType, colorBy, jobInstance, group,
     } = props;
 
     enum MenuKeys {
@@ -390,6 +407,13 @@ export default function ItemMenu(props: Props): MenuProps {
         items.push({
             key: MenuKeys.SWITCH_COLOR,
             label: <SwitchColorItem toolProps={props} />,
+        });
+    }
+
+    if (group && group.id > 0) {
+        items.push({
+            key: 'remove_group',
+            label: <RemoveGroupItem toolProps={props} />,
         });
     }
 

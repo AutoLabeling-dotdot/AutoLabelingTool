@@ -39,6 +39,8 @@ jobs:
       - name: Build and deploy
         working-directory: /home/bytesize/cvat/AutoLabelingTool
         shell: bash
+        env:
+          NUCLIO_HOST: ${{ secrets.GPU_NUCLIO_HOST }}
         run: |
           set -euo pipefail
 
