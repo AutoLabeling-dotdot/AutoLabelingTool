@@ -102,13 +102,12 @@ jobs:
           DEPLOY_PATH: ${{ secrets.SINGLE_EC2_DEPLOY_PATH }}
           CVAT_HOST: ${{ secrets.SINGLE_EC2_HOST }}
           LE_EMAIL: ${{ secrets.SINGLE_LE_EMAIL }}
-          NUCLIO_HOST: ${{ secrets.GPU_NUCLIO_HOST }}
 
         with:
           host: ${{ secrets.SINGLE_EC2_HOST }}
           username: ${{ secrets.SINGLE_EC2_USER }}
           key: ${{ secrets.SINGLE_EC2_SSH_KEY }}
-          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST,LE_EMAIL,CVAT_POSTGRES_PASSWORD,NUCLIO_HOST
+          envs: GH_TOKEN,GH_REPO,DEPLOY_PATH,CVAT_HOST,LE_EMAIL,CVAT_POSTGRES_PASSWORD
           script: |
             set -euo pipefail
 
@@ -133,7 +132,6 @@ jobs:
             export CVAT_HOST=${CVAT_HOST}
             export LE_EMAIL=${LE_EMAIL}
             export CVAT_POSTGRES_PASSWORD=${CVAT_POSTGRES_PASSWORD}
-            export NUCLIO_HOST=${NUCLIO_HOST}
             echo "⚙️  CVAT_HOST=${CVAT_HOST}"
 
             echo "🔐 ECR 로그인..."

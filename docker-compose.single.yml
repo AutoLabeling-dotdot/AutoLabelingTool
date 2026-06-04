@@ -21,8 +21,6 @@ services:
     environment:
       <<: *rds-env
       CVAT_SERVERLESS: 1
-      CVAT_NUCLIO_HOST: ${NUCLIO_HOST}
-      CVAT_NUCLIO_INVOKE_METHOD: dashboard
     volumes:
       - /data/cvat/data:/home/django/data
       - /data/cvat/keys:/home/django/keys
@@ -65,8 +63,6 @@ services:
     image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/single-dotdot-server:latest
     environment:
       <<: *rds-env
-      CVAT_NUCLIO_HOST: ${NUCLIO_HOST}
-      CVAT_NUCLIO_INVOKE_METHOD: dashboard
     volumes:
       - /data/cvat/data:/home/django/data
       - /data/cvat/keys:/home/django/keys
