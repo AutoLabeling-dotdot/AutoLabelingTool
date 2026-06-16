@@ -725,7 +725,12 @@ class TaskQuerySet(models.QuerySet):
                 ),
                 Fields.validation_jobs_count.value: models.Count(
                     'segment__job',
-                    filter=models.Q(segment__job__stage=StageChoice.VALIDATION.value),
+                    filter=models.Q(segment__job__stage__in=[
+                        StageChoice.VALIDATION.value,
+                        StageChoice.VALIDATION1.value,
+                        StageChoice.VALIDATION2.value,
+                        StageChoice.VALIDATION3.value,
+                    ]),
                     distinct=True,
                 ),
             }

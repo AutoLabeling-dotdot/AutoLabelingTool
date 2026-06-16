@@ -84,7 +84,11 @@ constraints.local.txt
 .env
 .env.local
 .env.production
+docker.env
 
 # AWS
 aws/
 awscliv2.zip
+
+# script
+scripts/

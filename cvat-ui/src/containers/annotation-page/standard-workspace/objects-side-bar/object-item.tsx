@@ -4,12 +4,14 @@
 // SPDX-License-Identifier: MIT
 
 import React from 'react';
+import Modal from 'antd/lib/modal';
 import { connect } from 'react-redux';
 
 import {
     updateAnnotationsAsync,
     changeFrameAsync,
     changeGroupColorAsync,
+    removeGroupAnnotationsAsync,
     pasteShapeAsync,
     updateActiveControl as updateActiveControlAction,
     copyShape as copyShapeAction,
@@ -64,6 +66,7 @@ interface DispatchToProps {
     copyShape: (objectState: ObjectState) => void;
     switchPropagateVisibility: (visible: boolean) => void;
     changeGroupColor(group: number, color: string): void;
+    removeGroupAnnotations(groupId: number): void;
     updateActiveControl(activeControl: ActiveControl): void;
     expandObject(objectState: ObjectState): void;
 }
@@ -133,6 +136,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         },
         changeGroupColor(group: number, color: string): void {
             dispatch(changeGroupColorAsync(group, color));
+        },
+        removeGroupAnnotations(groupId: number): void {
+            dispatch(removeGroupAnnotationsAsync(groupId));
         },
         updateActiveControl(activeControl: ActiveControl): void {
             dispatch(updateActiveControlAction(activeControl));
@@ -331,6 +337,18 @@ class ObjectItemContainer extends React.PureComponent<Props, State> {
         }
     };
 
+    private removeGroup = (): void => {
+        const { objectState, removeGroupAnnotations } = this.props;
+        if (!objectState.group?.id) return;
+        Modal.confirm({
+            title: 'Remove group',
+            content: 'All objects in this group will be removed. Continue?',
+            okType: 'danger',
+            okText: 'Delete',
+            onOk: () => removeGroupAnnotations(objectState.group.id),
+        });
+    };
+
     private changeLabel = (label: any): void => {
         const { objectState } = this.props;
         objectState.label = label;
@@ -426,7 +444,9 @@ class ObjectItemContainer extends React.PureComponent<Props, State> {
                 colorBy={colorBy}
                 activate={this.activate}
                 focusAndExpand={this.focusAndExpand}
+                group={objectState.group}
                 remove={this.remove}
+                removeGroup={this.removeGroup}
                 copy={this.copy}
                 createURL={this.createURL}
                 propagate={this.propagate}

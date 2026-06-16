@@ -36,6 +36,7 @@ const frameDataCache: Record<string, {
         size: number;
     }>;
     compressedChunks: Record<number, ArrayBuffer>;
+    pendingChunkRequests: Record<number, Promise<ArrayBuffer>>;
     getChunk: (chunkIndex: number, quality: ChunkQuality) => Promise<ArrayBuffer>;
     getMeta: () => Promise<FramesMetaData>;
 }> = {};
@@ -939,6 +940,7 @@ export async function getFrame(
             latestContextImagesRequest: null,
             contextCache: {},
             compressedChunks: {},
+            pendingChunkRequests: {},
             getChunk: async (chunkIndex: number, quality: ChunkQuality): Promise<ArrayBuffer> => {
                 if (
                     quality === ChunkQuality.COMPRESSED &&
@@ -946,11 +948,29 @@ export async function getFrame(
                 ) {
                     return frameDataCache[jobID].compressedChunks[chunkIndex];
                 }
-                const chunk = await getChunk(chunkIndex, quality);
+
                 if (quality === ChunkQuality.COMPRESSED) {
-                    frameDataCache[jobID].compressedChunks[chunkIndex] = chunk;
+                    const { pendingChunkRequests } = frameDataCache[jobID];
+                    if (chunkIndex in pendingChunkRequests) {
+                        return pendingChunkRequests[chunkIndex];
+                    }
+                    const promise = getChunk(chunkIndex, quality).then((chunk) => {
+                        if (jobID in frameDataCache) {
+                            frameDataCache[jobID].compressedChunks[chunkIndex] = chunk;
+                            delete frameDataCache[jobID].pendingChunkRequests[chunkIndex];
+                        }
+                        return chunk;
+                    }).catch((error: unknown) => {
+                        if (jobID in frameDataCache) {
+                            delete frameDataCache[jobID].pendingChunkRequests[chunkIndex];
+                        }
+                        throw error;
+                    });
+                    pendingChunkRequests[chunkIndex] = promise;
+                    return promise;
                 }
-                return chunk;
+
+                return getChunk(chunkIndex, quality);
             },
             getMeta: () => {
                 const cached = frameMetaCache[jobID];

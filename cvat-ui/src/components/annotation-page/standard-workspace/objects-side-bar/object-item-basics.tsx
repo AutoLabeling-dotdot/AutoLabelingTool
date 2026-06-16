@@ -40,10 +40,12 @@ interface Props {
     removeShortcut: string;
     sliceShortcut: string;
     runAnnotationsActionShortcut: string;
+    group: { id: number; color: string } | null;
     changeColor(color: string): void;
     changeLabel(label: any): void;
     copy(): void;
     remove(): void;
+    removeGroup(): void;
     propagate(): void;
     createURL(): void;
     switchOrientation(): void;
@@ -81,10 +83,12 @@ function ItemTopComponent(props: Props): JSX.Element {
         sliceShortcut,
         runAnnotationsActionShortcut,
         isGroundTruth,
+        group,
         changeColor,
         changeLabel,
         copy,
         remove,
+        removeGroup,
         propagate,
         createURL,
         switchOrientation,
@@ -167,9 +171,11 @@ function ItemTopComponent(props: Props): JSX.Element {
                             removeShortcut,
                             sliceShortcut,
                             runAnnotationsActionShortcut,
+                            group,
                             changeColor,
                             copy,
                             remove,
+                            removeGroup,
                             propagate,
                             createURL,
                             switchOrientation,
