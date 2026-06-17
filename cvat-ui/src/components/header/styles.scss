@@ -13,14 +13,15 @@
     height: $header-height;
     background: $header-color;
     justify-content: space-between;
+    color: white;
 }
 
 .ant-btn.ant-btn-link.cvat-header-button {
-    color: $text-color;
+    color: white;
     margin-right: $grid-unit-size;
 
     &:hover {
-        color: $text-color;
+        color: white;
     }
 }
 
@@ -52,6 +53,7 @@
 
     .cvat-logo-icon {
         margin: 0 $grid-unit-size * 2;
+        filter: brightness(0) invert(1);
     }
 
     display: flex;
@@ -77,6 +79,11 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    color: white;
+
+    .ant-typography {
+        color: white;
+    }
 
     .anticon.cvat-header-dropdown-icon {
         &.anticon-caret-down {
