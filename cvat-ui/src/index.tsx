@@ -154,7 +154,7 @@ const ReduxAppWrapper = connect(mapStateToProps, mapDispatchToProps)(CVATApplica
 
 const root = createRoot(document.getElementById('root') as HTMLDivElement);
 root.render((
-    <ConfigProvider theme={{ token: { colorPrimary: '#7452FF', colorBgLayout: '#F6F8FB' } }}>
+    <ConfigProvider theme={{ token: { colorPrimary: '#7452FF', colorLink: '#7452FF', colorBgLayout: '#F6F8FB' } }}>
         <Provider store={cvatStore}>
             <BrowserRouter>
                 <PluginsEntrypoint />

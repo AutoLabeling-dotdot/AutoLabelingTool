@@ -33,6 +33,7 @@ import UploadFileStatusModal from 'components/common/upload-file-status-modal';
 import SelectCSUpdatingSchemeModal from 'components/update-linked-cs-modal/select-cs-updating-scheme-modal';
 
 import JobsPageComponent from 'components/jobs-page/jobs-page';
+import HomePageComponent from 'components/home-page/home-page';
 import ModelsPageComponent from 'components/models-page/models-page';
 
 import TasksPageContainer from 'containers/tasks-page/tasks-page';
@@ -526,6 +527,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                     <ShortcutsDialog />
                                     <Switch>
                                         <Route exact path='/auth/logout' component={LogoutComponent} />
+                                        <Route exact path='/dotdot' component={HomePageComponent} />
                                         <Route exact path='/projects' component={ProjectsPageComponent} />
                                         <Route exact path='/projects/create' component={CreateProjectPageComponent} />
                                         <Route exact path='/projects/:id' component={ProjectPageComponent} />

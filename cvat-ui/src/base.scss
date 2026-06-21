@@ -4,11 +4,12 @@
 // SPDX-License-Identifier: MIT
 
 $grid-unit-size: 8px;
-$header-height: $grid-unit-size * 6;
+$header-height: $grid-unit-size * 7;
 $layout-lg-grid-size: $grid-unit-size * 2;
 $layout-sm-grid-color: rgba(0, 0, 0, 15%);
 $layout-lg-grid-color: rgba(0, 0, 0, 15%);
 $header-color: #202735;
+$panel-header-color: #EAE7F5;
 $text-color: #303030;
 $text-color-secondary: rgba(0, 0, 0, 45%);
 $hover-menu-color: rgba(116, 82, 255, 5%);
@@ -27,7 +28,7 @@ $player-buttons-color: #242424;
 $danger-icon-color: #ff4136;
 $ok-icon-color: #61c200;
 $info-icon-color: #5A3CDC;
-$objects-bar-tabs-color: #bebebe;
+$objects-bar-tabs-color: #CDC5E0;
 $objects-bar-icons-color: #242424; // #6e6e6e
 $active-label-background-color: #EAE5FF;
 $object-item-border-color: rgba(0, 0, 0, 70%);
