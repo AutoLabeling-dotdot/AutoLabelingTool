@@ -3,9 +3,6 @@ name: Deploy on dev (self-hosted @172.16.0.172)
 on:
   push:
     branches: [ "develop" ]
-  pull_request:
-    types: [ closed ]
-    branches: [ "develop" ]
   workflow_dispatch:
 
 jobs:
