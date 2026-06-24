@@ -13,14 +13,21 @@ export default function RecentTasksList({ data, loading }: RecentTasksListProps)
     return (
         <div className='cvat-home-recent-tasks'>
             <Text className='cvat-home-section-title'>Recent Tasks</Text>
+            <Text type='secondary' className='cvat-home-recent-tasks-hint'>
+                A job counts as done when it reaches the acceptance stage and is marked completed
+            </Text>
             <div className='cvat-home-recent-tasks-list'>
                 {loading ? (
                     <Skeleton active paragraph={{ rows: 4 }} />
                 ) : !data || data.recentTasks.length === 0 ? (
                     <Text type='secondary'>No recent tasks</Text>
                 ) : (
-                    data.recentTasks.map((task: any) => (
-                        <RecentTaskItem key={task.id} task={task} />
+                    data.recentTasks.map((item) => (
+                        <RecentTaskItem
+                            key={item.task.id}
+                            task={item.task}
+                            stageCounts={item.stageCounts}
+                        />
                     ))
                 )}
             </div>

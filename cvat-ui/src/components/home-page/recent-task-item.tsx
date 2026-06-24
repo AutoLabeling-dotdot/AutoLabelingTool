@@ -1,26 +1,31 @@
 import React from 'react';
 import { useHistory } from 'react-router';
-import Tag from 'antd/lib/tag';
-import Progress from 'antd/lib/progress';
 import Text from 'antd/lib/typography/Text';
+import CVATTooltip from 'components/common/cvat-tooltip';
 import dayjs from 'dayjs';
-
-const STATUS_COLORS: Record<string, string> = {
-    annotation: 'blue',
-    validation: 'orange',
-    completed: 'green',
-};
+import { STAGE_COLORS } from './stage-colors';
+import { StageCounts } from './use-dashboard-data';
 
 interface RecentTaskItemProps {
     task: any;
+    stageCounts: StageCounts;
 }
 
-export default function RecentTaskItem({ task }: RecentTaskItemProps): JSX.Element {
+export default function RecentTaskItem({ task, stageCounts }: RecentTaskItemProps): JSX.Element {
     const history = useHistory();
 
-    const jobsCount = task.jobs?.count ?? 0;
-    const jobsCompleted = task.jobs?.completed ?? 0;
-    const progress = jobsCount > 0 ? Math.round((jobsCompleted / jobsCount) * 100) : 0;
+    const jobsCount = stageCounts.annotation + stageCounts.validation + stageCounts.acceptance;
+    // "jobs done" keeps the strict CVAT definition (acceptance stage AND state=completed),
+    // matching the hint shown above the list. The stacked bar below uses pure stage buckets.
+    const jobsCompleted = task.progress?.completedJobs ?? 0;
+
+    const pct = (n: number): number => (jobsCount > 0 ? (n / jobsCount) * 100 : 0);
+
+    const segments = [
+        { key: 'annotation', label: 'Annotation', value: stageCounts.annotation },
+        { key: 'validation', label: 'Validation', value: stageCounts.validation },
+        { key: 'acceptance', label: 'Acceptance', value: stageCounts.acceptance },
+    ];
 
     return (
         <div
@@ -32,23 +37,34 @@ export default function RecentTaskItem({ task }: RecentTaskItemProps): JSX.Eleme
                 if (e.key === 'Enter') history.push(`/tasks/${task.id}`);
             }}
         >
-            <div className='cvat-home-recent-task-item-main'>
-                <Text strong className='cvat-home-recent-task-item-name'>
-                    {task.name || `Task #${task.id}`}
-                </Text>
-                <Tag color={STATUS_COLORS[task.status] || 'default'}>{task.status}</Tag>
+            <div className='cvat-home-recent-task-item-info'>
+                <div className='cvat-home-recent-task-item-main'>
+                    <Text strong className='cvat-home-recent-task-item-name'>
+                        {task.name || `Task #${task.id}`}
+                    </Text>
+                    <Text type='secondary' className='cvat-home-recent-task-item-updated'>
+                        {dayjs(task.updatedDate).fromNow()}
+                    </Text>
+                </div>
+                <div className='cvat-home-recent-task-item-progress'>
+                    {jobsCount > 0 ? segments.map((seg) => (
+                        seg.value > 0 && (
+                            <CVATTooltip key={seg.key} title={`${seg.label}: ${seg.value}`}>
+                                <div
+                                    className='cvat-home-recent-task-item-progress-segment'
+                                    style={{
+                                        width: `${pct(seg.value)}%`,
+                                        backgroundColor: STAGE_COLORS[seg.key as keyof typeof STAGE_COLORS],
+                                    }}
+                                />
+                            </CVATTooltip>
+                        )
+                    )) : null}
+                </div>
             </div>
-            <div className='cvat-home-recent-task-item-meta'>
-                <Progress
-                    percent={progress}
-                    size='small'
-                    showInfo={false}
-                    className='cvat-home-recent-task-item-progress'
-                />
-                <Text type='secondary' className='cvat-home-recent-task-item-updated'>
-                    {dayjs(task.updatedDate).fromNow()}
-                </Text>
-            </div>
+            <Text className='cvat-home-recent-task-item-jobs'>
+                {`${jobsCompleted}/${jobsCount} jobs done`}
+            </Text>
         </div>
     );
 }

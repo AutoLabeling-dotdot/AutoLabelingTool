@@ -11,6 +11,7 @@ import { Bar } from 'react-chartjs-2';
 import Skeleton from 'antd/lib/skeleton';
 import Text from 'antd/lib/typography/Text';
 import { DashboardData } from './use-dashboard-data';
+import { STAGE_COLORS } from './stage-colors';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -28,17 +29,17 @@ export default function ProjectsStageChart({ data, loading }: ProjectsStageChart
             {
                 label: 'Annotation',
                 data: projects.map((p) => p.stageCounts.annotation),
-                backgroundColor: '#7452FF',
+                backgroundColor: STAGE_COLORS.annotation,
             },
             {
                 label: 'Validation',
                 data: projects.map((p) => p.stageCounts.validation),
-                backgroundColor: '#C4B5FD',
+                backgroundColor: STAGE_COLORS.validation,
             },
             {
                 label: 'Acceptance',
                 data: projects.map((p) => p.stageCounts.acceptance),
-                backgroundColor: '#9CA3AF',
+                backgroundColor: STAGE_COLORS.acceptance,
             },
         ],
     };

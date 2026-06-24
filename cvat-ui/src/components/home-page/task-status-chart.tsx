@@ -6,6 +6,7 @@ import { Doughnut } from 'react-chartjs-2';
 import Skeleton from 'antd/lib/skeleton';
 import Text from 'antd/lib/typography/Text';
 import { DashboardData } from './use-dashboard-data';
+import { STAGE_COLOR_LIST } from './stage-colors';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -24,7 +25,7 @@ export default function TaskStatusChart({ data, loading }: TaskStatusChartProps)
                     data.stageCounts.validation,
                     data.stageCounts.acceptance,
                 ] : [0, 0, 0],
-                backgroundColor: ['#7452FF', '#C4B5FD', '#9CA3AF'],
+                backgroundColor: STAGE_COLOR_LIST,
                 borderWidth: 0,
             },
         ],

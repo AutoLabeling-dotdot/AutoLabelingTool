@@ -40,6 +40,17 @@ export interface ProjectSummary {
     };
 }
 
+export interface StageCounts {
+    annotation: number;
+    validation: number;
+    acceptance: number;
+}
+
+export interface RecentTask {
+    task: any;
+    stageCounts: StageCounts;
+}
+
 export interface DashboardData {
     counts: {
         projects: number;
@@ -47,13 +58,21 @@ export interface DashboardData {
         jobs: number;
         pendingReviews: number;
     };
-    stageCounts: {
-        annotation: number;
-        validation: number;
-        acceptance: number;
-    };
-    recentTasks: any[];
+    stageCounts: StageCounts;
+    recentTasks: RecentTask[];
     projects: ProjectSummary[];
+}
+
+const taskJobsFilter = (taskId: number): string => JSON.stringify({
+    '==': [{ var: 'task_id' }, taskId],
+});
+
+// Maps a job's stage to one of the 3 visualization buckets.
+// validation1/2/3 all collapse into "validation".
+function bucketStage(stage: string): keyof StageCounts {
+    if (stage === 'acceptance') return 'acceptance';
+    if (stage && stage.startsWith('validation')) return 'validation';
+    return 'annotation';
 }
 
 interface DashboardState {
@@ -161,6 +180,28 @@ export function useDashboardData(): DashboardState {
                     }),
                 );
 
+                const recentTasksArray = Array.from(recentTasksRes) as any[];
+                const recentTasks: RecentTask[] = await Promise.all(
+                    recentTasksArray.map(async (task) => {
+                        const jobsForTask = Array.from(
+                            await cvat.jobs.get({
+                                page: 1,
+                                pageSize: 1000,
+                                filter: taskJobsFilter(task.id),
+                            }),
+                        ) as any[];
+
+                        const stageCounts: StageCounts = {
+                            annotation: 0, validation: 0, acceptance: 0,
+                        };
+                        jobsForTask.forEach((job) => {
+                            stageCounts[bucketStage(job.stage)] += 1;
+                        });
+
+                        return { task, stageCounts };
+                    }),
+                );
+
                 if (cancelled) return;
 
                 setState({
@@ -176,7 +217,7 @@ export function useDashboardData(): DashboardState {
                             validation: validationCount,
                             acceptance: acceptanceCount,
                         },
-                        recentTasks: Array.from(recentTasksRes),
+                        recentTasks,
                         projects: projectSummaries,
                     },
                     loading: false,

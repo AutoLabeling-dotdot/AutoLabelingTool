@@ -69,14 +69,23 @@ export default function ProjectItemComponent(props: Props): JSX.Element {
         <Card
             ref={itemRef}
             cover={(
-                <Preview
-                    project={instance}
-                    loadingClassName='cvat-project-item-loading-preview'
-                    emptyPreviewClassName='cvat-project-item-empty-preview'
-                    previewWrapperClassName='cvat-projects-project-item-card-preview-wrapper'
-                    previewClassName='cvat-projects-project-item-card-preview'
-                    onClick={onOpenProject}
-                />
+                <>
+                    <Preview
+                        project={instance}
+                        loadingClassName='cvat-project-item-loading-preview'
+                        emptyPreviewClassName='cvat-project-item-empty-preview'
+                        previewWrapperClassName='cvat-projects-project-item-card-preview-wrapper'
+                        previewClassName='cvat-projects-project-item-card-preview'
+                        onClick={onOpenProject}
+                    />
+                    <Button
+                        className='cvat-project-details-button cvat-actions-menu-button'
+                        type='link'
+                        size='large'
+                        icon={<MoreOutlined />}
+                        onClick={handleContextMenuClick}
+                    />
+                </>
             )}
             size='small'
             style={style}
@@ -98,27 +107,15 @@ export default function ProjectItemComponent(props: Props): JSX.Element {
                 )}
                 description={(
                     <div className='cvat-projects-project-item-description'>
-                        <div>
-                            {ownerName && (
-                                <>
-                                    <Text type='secondary'>
-                                        Created
-                                        {ownerName ? ` by ${ownerName}` : ''}
-                                    </Text>
-                                    <br />
-                                </>
-                            )}
-                            <Text type='secondary'>{`Last updated ${updated}`}</Text>
-                        </div>
-                        <div>
-                            <Button
-                                className='cvat-project-details-button cvat-actions-menu-button'
-                                type='link'
-                                size='large'
-                                icon={<MoreOutlined />}
-                                onClick={handleContextMenuClick}
-                            />
-                        </div>
+                        {ownerName && (
+                            <>
+                                <Text className='cvat-projects-project-item-subtext'>
+                                    {`Created by ${ownerName}`}
+                                </Text>
+                                <br />
+                            </>
+                        )}
+                        <Text className='cvat-projects-project-item-subtext'>{`Last updated ${updated}`}</Text>
                     </div>
                 )}
             />
