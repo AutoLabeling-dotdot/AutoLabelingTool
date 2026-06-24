@@ -14,7 +14,7 @@ import {
     InfoCircleOutlined,
     LoadingOutlined,
     LogoutOutlined,
-    GithubOutlined,
+    CopyrightCircleOutlined,
     QuestionCircleOutlined,
     CaretDownOutlined,
     ControlOutlined,
@@ -178,8 +178,9 @@ function HeaderComponent(props: Props): JSX.Element {
     } = props;
 
     const {
-        CHANGELOG_URL, LICENSE_URL, GITHUB_URL, GUIDE_URL, DISCORD_URL,
+        CHANGELOG_URL, LICENSE_URL, GUIDE_URL, DISCORD_URL,
     } = config;
+    const MANUAL_URL = 'https://manual.2dot.ai/';
 
     const isMounted = useIsMounted();
 
@@ -405,6 +406,18 @@ function HeaderComponent(props: Props): JSX.Element {
             <div className='cvat-left-header'>
                 <CVATLogo />
                 <Button
+                    className={getButtonClassName('dotdot')}
+                    type='link'
+                    value='dotdot'
+                    href='/dotdot'
+                    onClick={(event: React.MouseEvent): void => {
+                        event.preventDefault();
+                        history.push('/dotdot');
+                    }}
+                >
+                    Home
+                </Button>
+                <Button
                     className={getButtonClassName('projects')}
                     type='link'
                     value='projects'
@@ -493,29 +506,34 @@ function HeaderComponent(props: Props): JSX.Element {
                 ) : null}
             </div>
             <div className='cvat-right-header'>
-                <CVATTooltip overlay='Click to open repository'>
+                {currentOrganization ? (
+                    <Text className='cvat-header-current-organization'>
+                        {`@${currentOrganization.slug}`}
+                    </Text>
+                ) : null}
+                <CVATTooltip overlay='Click to open CVAT guide'>
                     <Button
-                        icon={<GithubOutlined />}
+                        icon={<CopyrightCircleOutlined />}
                         size='large'
-                        className='cvat-open-repository-button cvat-header-button'
-                        type='link'
-                        href={GITHUB_URL}
-                        onClick={(event: React.MouseEvent): void => {
-                            event.preventDefault();
-                            window.open(GITHUB_URL, '_blank');
-                        }}
-                    />
-                </CVATTooltip>
-                <CVATTooltip overlay='Click to open guide'>
-                    <Button
-                        icon={<QuestionCircleOutlined />}
-                        size='large'
-                        className='cvat-open-guide-button cvat-header-button'
+                        className='cvat-open-cvat-guide-button cvat-header-button'
                         type='link'
                         href={GUIDE_URL}
                         onClick={(event: React.MouseEvent): void => {
                             event.preventDefault();
                             window.open(GUIDE_URL, '_blank');
+                        }}
+                    />
+                </CVATTooltip>
+                <CVATTooltip overlay='Click to open Dotdot guide'>
+                    <Button
+                        icon={<QuestionCircleOutlined />}
+                        size='large'
+                        className='cvat-open-guide-button cvat-header-button'
+                        type='link'
+                        href={MANUAL_URL}
+                        onClick={(event: React.MouseEvent): void => {
+                            event.preventDefault();
+                            window.open(MANUAL_URL, '_blank');
                         }}
                     />
                 </CVATTooltip>

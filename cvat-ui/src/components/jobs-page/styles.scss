@@ -48,18 +48,109 @@
     .cvat-job-page-list-item {
         display: flex;
         flex-direction: column;
+        position: relative;
+        overflow: hidden;
 
+        // 이미지가 카드 전체를 채움
         .ant-card-cover {
-            flex: 1;
-            height: 0;
+            position: absolute;
+            inset: 0;
+            height: 100%;
             margin: 0;
+            z-index: 1;
         }
 
+        // 정보를 이미지 위 하단에 frosted glass 오버레이
         .ant-card-body {
-            padding: $grid-unit-size;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            padding: $grid-unit-size * 1.5;
+            background: rgba(0, 0, 0, 10%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
 
-            .ant-descriptions-item {
-                padding: 0;
+        .cvat-job-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: $grid-unit-size * 0.5;
+            padding-right: $grid-unit-size * 3; // ··· 버튼 공간
+
+            .cvat-job-card-stage-row {
+                display: flex;
+                align-items: center;
+                gap: $grid-unit-size;
+
+                .cvat-job-card-stage {
+                    color: rgba(255, 255, 255, 75%);
+                    font-size: 12px;
+                    text-transform: capitalize;
+                }
+
+                .cvat-job-card-state {
+                    margin: 0;
+                    padding: 0 $grid-unit-size;
+                    line-height: $grid-unit-size * 2.25;
+                    font-size: 11px;
+                    border: none;
+                    border-radius: $grid-unit-size * 0.5;
+                    text-transform: capitalize;
+
+                    &.cvat-job-card-state-new {
+                        background: rgba(255, 255, 255, 18%);
+                        color: rgba(255, 255, 255, 90%);
+                    }
+
+                    &.cvat-job-card-state-progress {
+                        background: rgba(116, 82, 255, 35%);
+                        color: #ffffff;
+                    }
+
+                    &.cvat-job-card-state-completed {
+                        background: rgba(97, 194, 0, 30%);
+                        color: #eaffd6;
+                    }
+
+                    &.cvat-job-card-state-rejected {
+                        background: rgba(255, 65, 54, 30%);
+                        color: #ffe2df;
+                    }
+                }
+            }
+
+            .cvat-job-card-task-name {
+                color: white;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .cvat-job-card-meta-row {
+                display: flex;
+                align-items: center;
+                gap: $grid-unit-size;
+
+                .cvat-job-card-frames {
+                    color: rgba(255, 255, 255, 75%);
+                    font-size: 12px;
+                }
+
+                .cvat-job-card-assignee {
+                    color: rgba(255, 255, 255, 75%);
+                    font-size: 12px;
+
+                    &::before {
+                        content: '\00b7';
+                        margin-right: $grid-unit-size;
+                    }
+                }
+            }
+
+            .cvat-job-card-created {
+                color: rgba(255, 255, 255, 55%);
+                font-size: 12px;
             }
         }
 
@@ -120,6 +211,7 @@
             text-align: center;
             opacity: 0.5;
             padding: $grid-unit-size;
+            z-index: 3;
         }
 
         .cvat-job-page-list-item-id {
@@ -182,7 +274,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            color: rgba(0, 0, 0, 0.45);
+            color: rgba(255, 255, 255, 75%);
             margin-bottom: 0;
         }
 
@@ -191,11 +283,13 @@
         }
     }
 
-    // ··· 버튼 위치 (카드 우하단 고정)
+    // ··· 버튼 위치 (카드 우하단)
     .cvat-job-card-more-button {
         position: absolute;
-        bottom: $grid-unit-size * 2;
+        bottom: $grid-unit-size;
         right: $grid-unit-size;
+        z-index: 3;
         font-size: 16px;
+        color: white;
     }
 }

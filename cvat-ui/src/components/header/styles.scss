@@ -13,14 +13,15 @@
     height: $header-height;
     background: $header-color;
     justify-content: space-between;
+    color: white;
 }
 
 .ant-btn.ant-btn-link.cvat-header-button {
-    color: $text-color;
+    color: white;
     margin-right: $grid-unit-size;
 
     &:hover {
-        color: $text-color;
+        color: white;
     }
 }
 
@@ -43,15 +44,26 @@
 .cvat-left-header {
     .ant-btn.cvat-header-button {
         opacity: 0.7;
+        border-radius: 0;
+        height: $header-height;
+        display: inline-flex;
+        align-items: center;
+
+        &:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.06);
+        }
 
         &.cvat-active-header-button {
             font-weight: bold;
             opacity: 1;
+            box-shadow: inset 0 -3px 0 #7452FF;
         }
     }
 
     .cvat-logo-icon {
         margin: 0 $grid-unit-size * 2;
+        filter: brightness(0) invert(1);
     }
 
     display: flex;
@@ -71,12 +83,23 @@
             line-height: 24px;
         }
     }
+
+    .cvat-header-current-organization {
+        color: rgba(255, 255, 255, 0.7);
+        margin-right: $grid-unit-size * 2;
+        font-size: 13px;
+    }
 }
 
 .cvat-header-menu-user-dropdown {
     display: flex;
     align-items: center;
     cursor: pointer;
+    color: white;
+
+    .ant-typography {
+        color: white;
+    }
 
     .anticon.cvat-header-dropdown-icon {
         &.anticon-caret-down {

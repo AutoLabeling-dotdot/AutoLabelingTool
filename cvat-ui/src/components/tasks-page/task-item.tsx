@@ -124,7 +124,7 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
                             {importingState.state !== RQStatus.FAILED && (
                                 <Progress
                                     percent={importingState.progress}
-                                    strokeColor='#1890FF'
+                                    strokeColor='#7452FF'
                                     size='small'
                                 />
                             )}
@@ -169,7 +169,7 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
                         <Progress
                             percent={jobsProgress}
                             success={{ percent: (numOfCompleted * 100) / numOfJobs }}
-                            strokeColor='#1890FF'
+                            strokeColor='#7452FF'
                             showInfo={false}
                             size='small'
                         />

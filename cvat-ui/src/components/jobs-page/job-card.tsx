@@ -6,8 +6,10 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
+import dayjs from 'dayjs';
 import Card from 'antd/lib/card';
-import Descriptions from 'antd/lib/descriptions';
+import Tag from 'antd/lib/tag';
+import Text from 'antd/lib/typography/Text';
 import Progress from 'antd/lib/progress';
 import { MoreOutlined } from '@ant-design/icons';
 
@@ -16,6 +18,13 @@ import { useCardHeightHOC, useContextMenuClick } from 'utils/hooks';
 import Preview from 'components/common/preview';
 import { CombinedState } from 'reducers';
 import JobActionsComponent from './actions-menu';
+
+const STATE_CLASS: Record<string, string> = {
+    new: 'cvat-job-card-state-new',
+    'in progress': 'cvat-job-card-state-progress',
+    completed: 'cvat-job-card-state-completed',
+    rejected: 'cvat-job-card-state-rejected',
+};
 
 const useCardHeight = useCardHeightHOC({
     containerClassName: 'cvat-jobs-page',
@@ -99,20 +108,28 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                     hoverable
                     onClick={onClick}
                 >
-                    <Descriptions column={1} size='small'>
-                        <Descriptions.Item label='Task'>{job.taskName}</Descriptions.Item>
-                        <Descriptions.Item label='Stage and state'>{`${job.stage} ${job.state}`}</Descriptions.Item>
-                        {/* Frames 항목은 progress bar 섹션으로 대체 - save 이력 있을 때 */}
-                        {job.annotationProgress == null && (
-                            <Descriptions.Item label='Frames'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
-                        )}
-                        <Descriptions.Item label='Created'>{new Date(job.createdDate).toLocaleDateString()}</Descriptions.Item>
-                        {job.assignee ? (
-                            <Descriptions.Item label='Assignee'>{job.assignee.username}</Descriptions.Item>
-                        ) : (
-                            <Descriptions.Item label='Assignee'> </Descriptions.Item>
-                        )}
-                    </Descriptions>
+                    <div className='cvat-job-card-info'>
+                        <div className='cvat-job-card-stage-row'>
+                            <Text className='cvat-job-card-stage'>{job.stage}</Text>
+                            <Tag className={`cvat-job-card-state ${STATE_CLASS[job.state] || ''}`}>
+                                {job.state}
+                            </Tag>
+                        </div>
+                        <Text className='cvat-job-card-task-name' ellipsis={{ tooltip: job.taskName }}>
+                            {job.taskName}
+                        </Text>
+                        <div className='cvat-job-card-meta-row'>
+                            <Text className='cvat-job-card-frames'>
+                                {`${job.stopFrame - job.startFrame + 1} frames`}
+                            </Text>
+                            {job.assignee && (
+                                <Text className='cvat-job-card-assignee'>{job.assignee.username}</Text>
+                            )}
+                        </div>
+                        <Text className='cvat-job-card-created'>
+                            {`${dayjs(job.createdDate).format('YYYY.MM.DD')} created`}
+                        </Text>
+                    </div>
                     {/* Save 이력이 있을 때만 progress bar 섹션 표시 */}
                     {job.annotationProgress != null && job.lastFrame != null && (
                         <div className='cvat-job-card-progress-section'>
@@ -123,7 +140,7 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                             <Progress
                                 percent={job.annotationProgress}
                                 showInfo={false}
-                                strokeColor='#000000'
+                                strokeColor='#ffffff'
                                 size='small'
                             />
                         </div>

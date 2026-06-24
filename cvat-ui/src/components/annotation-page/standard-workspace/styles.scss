@@ -100,7 +100,7 @@
     padding: 2px;
 
     &:hover:not(.cvat-disabled-canvas-control) {
-        background: $header-color;
+        background: $panel-header-color;
         transform: scale(0.75);
     }
 
@@ -123,7 +123,7 @@
 }
 
 .cvat-active-canvas-control {
-    background: $header-color;
+    background: $panel-header-color;
     transform: scale(0.75);
 }
 

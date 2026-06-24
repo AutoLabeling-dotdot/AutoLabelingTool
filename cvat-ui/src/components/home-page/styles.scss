@@ -1,0 +1,183 @@
+@import 'base';
+
+.cvat-home-page {
+    padding-top: $grid-unit-size * 3;
+    padding-bottom: $grid-unit-size * 3;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.cvat-home-stats-cards {
+    margin-bottom: $grid-unit-size * 3;
+}
+
+.cvat-home-stat-card {
+    .ant-card-body {
+        padding: $grid-unit-size * 2 $grid-unit-size * 3;
+        display: flex;
+        flex-direction: column;
+        gap: $grid-unit-size;
+    }
+
+    .cvat-home-stat-card-label {
+        font-size: 13px;
+        color: $text-color-secondary;
+    }
+
+    .cvat-home-stat-card-value {
+        font-size: 28px;
+        font-weight: 600;
+        color: $text-color;
+        line-height: 1.2;
+    }
+
+    .cvat-home-stat-card-skeleton {
+        max-width: 80px;
+    }
+}
+
+.cvat-home-content-row {
+    align-items: stretch;
+    margin-bottom: $grid-unit-size * 2;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.cvat-home-projects-table {
+    background: $background-color-1;
+    border-radius: $border-radius-base;
+    padding: $grid-unit-size * 3;
+
+    .cvat-home-projects-table-name {
+        color: #7452FF;
+        cursor: pointer;
+        font-weight: 500;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.cvat-home-projects-stage-chart {
+    background: $background-color-1;
+    border-radius: $border-radius-base;
+    padding: $grid-unit-size * 3;
+
+    .cvat-home-projects-stage-chart-canvas {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.cvat-home-section-title {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: $text-color;
+    margin-bottom: $grid-unit-size * 2;
+}
+
+.cvat-home-task-status-chart {
+    background: $background-color-1;
+    border-radius: $border-radius-base;
+    padding: $grid-unit-size * 3;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .cvat-home-task-status-chart-canvas {
+        flex-grow: 1;
+        min-height: $grid-unit-size * 27;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.cvat-home-recent-tasks {
+    background: $background-color-1;
+    border-radius: $border-radius-base;
+    padding: $grid-unit-size * 3;
+    height: 100%;
+}
+
+.cvat-home-recent-tasks-hint {
+    display: block;
+    font-size: 12px;
+    opacity: 0.65;
+    margin-top: -$grid-unit-size;
+    margin-bottom: $grid-unit-size * 2;
+}
+
+.cvat-home-recent-tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: $grid-unit-size;
+}
+
+.cvat-home-recent-task-item {
+    display: flex;
+    align-items: center;
+    gap: $grid-unit-size * 3;
+    padding: $grid-unit-size * 1.5 $grid-unit-size * 2;
+    border-radius: $border-radius-base;
+    cursor: pointer;
+    transition: background 0.15s;
+    background: $background-color-2;
+
+    &:hover {
+        background: #ECEFF4;
+    }
+
+    .cvat-home-recent-task-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .cvat-home-recent-task-item-main {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: $grid-unit-size;
+        margin-bottom: $grid-unit-size;
+    }
+
+    .cvat-home-recent-task-item-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cvat-home-recent-task-item-updated {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .cvat-home-recent-task-item-progress {
+        display: flex;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        background: $background-color-2;
+        gap: 1px;
+    }
+
+    .cvat-home-recent-task-item-progress-segment {
+        height: 100%;
+        min-width: 2px;
+    }
+
+    .cvat-home-recent-task-item-jobs {
+        flex-shrink: 0;
+        width: $grid-unit-size * 14;
+        text-align: right;
+        font-size: 13px;
+        color: $text-color-secondary;
+        white-space: nowrap;
+    }
+}
