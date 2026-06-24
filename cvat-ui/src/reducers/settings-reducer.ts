@@ -63,6 +63,8 @@ const defaultState: SettingsState = {
         brightnessLevel: 100,
         contrastLevel: 100,
         saturationLevel: 100,
+        grayscaleLevel: 0,
+        invertLevel: 0,
     },
     imageFilters: [],
     showDialog: false,
@@ -288,6 +290,24 @@ export default (state = defaultState, action: AnyAction): SettingsState => {
                 player: {
                     ...state.player,
                     saturationLevel: action.payload.level,
+                },
+            };
+        }
+        case SettingsActionTypes.CHANGE_GRAYSCALE_LEVEL: {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    grayscaleLevel: action.payload.level,
+                },
+            };
+        }
+        case SettingsActionTypes.CHANGE_INVERT_LEVEL: {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    invertLevel: action.payload.level,
                 },
             };
         }

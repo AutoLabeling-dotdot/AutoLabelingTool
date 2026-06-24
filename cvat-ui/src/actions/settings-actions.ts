@@ -40,6 +40,8 @@ export enum SettingsActionTypes {
     CHANGE_BRIGHTNESS_LEVEL = 'CHANGE_BRIGHTNESS_LEVEL',
     CHANGE_CONTRAST_LEVEL = 'CHANGE_CONTRAST_LEVEL',
     CHANGE_SATURATION_LEVEL = 'CHANGE_SATURATION_LEVEL',
+    CHANGE_GRAYSCALE_LEVEL = 'CHANGE_GRAYSCALE_LEVEL',
+    CHANGE_INVERT_LEVEL = 'CHANGE_INVERT_LEVEL',
     SWITCH_AUTO_SAVE = 'SWITCH_AUTO_SAVE',
     CHANGE_AUTO_SAVE_INTERVAL = 'CHANGE_AUTO_SAVE_INTERVAL',
     CHANGE_FOCUSED_OBJECT_PADDING = 'CHANGE_FOCUSED_OBJECT_PADDING',
@@ -272,6 +274,24 @@ export function changeContrastLevel(level: number): AnyAction {
 export function changeSaturationLevel(level: number): AnyAction {
     return {
         type: SettingsActionTypes.CHANGE_SATURATION_LEVEL,
+        payload: {
+            level,
+        },
+    };
+}
+
+export function changeGrayscaleLevel(level: number): AnyAction {
+    return {
+        type: SettingsActionTypes.CHANGE_GRAYSCALE_LEVEL,
+        payload: {
+            level,
+        },
+    };
+}
+
+export function changeInvertLevel(level: number): AnyAction {
+    return {
+        type: SettingsActionTypes.CHANGE_INVERT_LEVEL,
         payload: {
             level,
         },
