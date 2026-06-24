@@ -97,6 +97,8 @@ interface StateToProps {
     brightnessLevel: number;
     contrastLevel: number;
     saturationLevel: number;
+    grayscaleLevel: number;
+    invertLevel: number;
     resetZoom: boolean;
     smoothImage: boolean;
     focusedObjectPadding: number;
@@ -184,6 +186,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 brightnessLevel,
                 contrastLevel,
                 saturationLevel,
+                grayscaleLevel,
+                invertLevel,
                 resetZoom,
                 smoothImage,
             },
@@ -236,6 +240,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
         brightnessLevel: brightnessLevel / 100,
         contrastLevel: contrastLevel / 100,
         saturationLevel: saturationLevel / 100,
+        grayscaleLevel: grayscaleLevel / 100,
+        invertLevel: invertLevel / 100,
         resetZoom,
         smoothImage,
         focusedObjectPadding,
@@ -458,6 +464,8 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
             brightnessLevel,
             contrastLevel,
             saturationLevel,
+            grayscaleLevel,
+            invertLevel,
             showObjectsTextAlways,
             textFontSize,
             controlPointsSize,
@@ -564,11 +572,14 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         if (
             brightnessLevel !== prevProps.brightnessLevel ||
             contrastLevel !== prevProps.contrastLevel ||
-            saturationLevel !== prevProps.saturationLevel
+            saturationLevel !== prevProps.saturationLevel ||
+            grayscaleLevel !== prevProps.grayscaleLevel ||
+            invertLevel !== prevProps.invertLevel
         ) {
             canvasInstance.configure({
                 CSSImageFilter:
-                    `brightness(${brightnessLevel}) contrast(${contrastLevel}) saturate(${saturationLevel})`,
+                    `brightness(${brightnessLevel}) contrast(${contrastLevel}) saturate(${saturationLevel}) ` +
+                    `grayscale(${grayscaleLevel}) invert(${invertLevel})`,
             });
         }
 
@@ -1043,6 +1054,8 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
             brightnessLevel,
             contrastLevel,
             saturationLevel,
+            grayscaleLevel,
+            invertLevel,
         } = this.props;
         const { canvasInstance } = this.props as { canvasInstance: Canvas };
 
@@ -1060,7 +1073,8 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
 
         canvasInstance.configure({
             CSSImageFilter:
-                `brightness(${brightnessLevel}) contrast(${contrastLevel}) saturate(${saturationLevel})`,
+                `brightness(${brightnessLevel}) contrast(${contrastLevel}) saturate(${saturationLevel}) ` +
+                `grayscale(${grayscaleLevel}) invert(${invertLevel})`,
         });
 
         canvasInstance.fitCanvas();

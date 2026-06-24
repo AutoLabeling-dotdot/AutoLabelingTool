@@ -20,12 +20,15 @@ import {
     changeBrightnessLevel,
     changeContrastLevel,
     changeSaturationLevel,
+    changeGrayscaleLevel,
+    changeInvertLevel,
     changeGridSize,
     resetImageFilters,
 } from 'actions/settings-actions';
 import { clamp } from 'utils/math';
 import { GridColor, CombinedState, PlayerSettingsState } from 'reducers';
 import GammaFilter from './gamma-filter';
+import ClaheFilter from './clahe-filter';
 
 const minGridSize = 5;
 const maxGridSize = 1000;
@@ -36,6 +39,8 @@ export default function ImageSetupsContent(): JSX.Element {
         brightnessLevel,
         contrastLevel,
         saturationLevel,
+        grayscaleLevel,
+        invertLevel,
         gridOpacity,
         gridColor,
         gridSize,
@@ -171,9 +176,40 @@ export default function ImageSetupsContent(): JSX.Element {
                             />
                         </Col>
                     </Row>
+                    <Row className='cvat-image-setups-grayscale'>
+                        <Col span={6}>
+                            <Text className='cvat-text-color'> Grayscale </Text>
+                        </Col>
+                        <Col span={12}>
+                            <Slider
+                                min={0}
+                                max={100}
+                                value={grayscaleLevel}
+                                onChange={(value: number | [number, number]): void => {
+                                    dispatch(changeGrayscaleLevel(value as number));
+                                }}
+                            />
+                        </Col>
+                    </Row>
+                    <Row className='cvat-image-setups-invert'>
+                        <Col span={6}>
+                            <Text className='cvat-text-color'> Invert </Text>
+                        </Col>
+                        <Col span={12}>
+                            <Slider
+                                min={0}
+                                max={100}
+                                value={invertLevel}
+                                onChange={(value: number | [number, number]): void => {
+                                    dispatch(changeInvertLevel(value as number));
+                                }}
+                            />
+                        </Col>
+                    </Row>
                 </Col>
             </Row>
             <GammaFilter />
+            <ClaheFilter />
             <Row className='cvat-image-setups-reset-color-settings' justify='space-around'>
                 <Col>
                     <Button
@@ -183,6 +219,8 @@ export default function ImageSetupsContent(): JSX.Element {
                             dispatch(changeBrightnessLevel(defaultValue));
                             dispatch(changeContrastLevel(defaultValue));
                             dispatch(changeSaturationLevel(defaultValue));
+                            dispatch(changeGrayscaleLevel(0));
+                            dispatch(changeInvertLevel(0));
                             dispatch(resetImageFilters());
                         }}
                     >

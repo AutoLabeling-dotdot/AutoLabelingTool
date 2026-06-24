@@ -988,6 +988,8 @@ export interface PlayerSettingsState {
     brightnessLevel: number;
     contrastLevel: number;
     saturationLevel: number;
+    grayscaleLevel: number;
+    invertLevel: number;
 }
 
 export interface WorkspaceSettingsState {
