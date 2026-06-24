@@ -28,6 +28,7 @@ import {
 import { clamp } from 'utils/math';
 import { GridColor, CombinedState, PlayerSettingsState } from 'reducers';
 import GammaFilter from './gamma-filter';
+import ClaheFilter from './clahe-filter';
 
 const minGridSize = 5;
 const maxGridSize = 1000;
@@ -208,6 +209,7 @@ export default function ImageSetupsContent(): JSX.Element {
                 </Col>
             </Row>
             <GammaFilter />
+            <ClaheFilter />
             <Row className='cvat-image-setups-reset-color-settings' justify='space-around'>
                 <Col>
                     <Button
