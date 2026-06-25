@@ -5,7 +5,9 @@
 #   - Docker 이미지 빌드 (server + UI)
 #   - ECR에 :latest 태그로 push
 #
-# [CD] 배포는 수동으로 EC2 접속 후 아래 절차 실행
+# [CD] 배포는 수동으로 EC2 접속 후 아래 절차 실행 (작업 디렉터리: /opt/cvatdotdot)
+#
+#   0. 배포 경로에 .env 준비: CVAT_POSTGRES_PASSWORD, CVAT_HOST(2dot.ai), LE_EMAIL 필수
 #
 #   1. ECR 로그인
 #      aws ecr get-login-password --region ap-northeast-2 | \
@@ -19,6 +21,9 @@
 #
 #   4. 서비스 재기동
 #      docker compose -f docker-compose.yml -f docker-compose.main.yml up -d
+#
+#   5. .env 삭제 (배포 완료 후 비밀번호 평문 파일 정리)
+#      rm -f .env
 # ============================================================
 
 name: Deploy on main dotdot (AWS EC2)
