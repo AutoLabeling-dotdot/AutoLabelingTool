@@ -103,6 +103,10 @@ services:
       - /data/cvat/keys:/home/django/keys
       - /data/cvat/logs:/home/django/logs
 
+  cvat_redis_ondisk:
+    volumes:
+      - /data/cvat/kvrocks:/var/lib/kvrocks
+
   cvat_ui:
     image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-ui:latest
     labels:
