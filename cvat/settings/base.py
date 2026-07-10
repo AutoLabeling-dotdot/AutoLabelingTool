@@ -567,7 +567,7 @@ redis_ondisk_port = os.getenv("CVAT_REDIS_ONDISK_PORT", 6666)
 redis_ondisk_password = os.getenv("CVAT_REDIS_ONDISK_PASSWORD", "")
 
 # Sets the timeout for the expiration of data chunk in redis_ondisk
-CVAT_CHUNK_CACHE_TTL = 3600 * 24  # 1 day
+CVAT_CHUNK_CACHE_TTL = 3600 * 8  # 8 hours
 
 # Sets the timeout for the expiration of preview image in redis_ondisk
 CVAT_PREVIEW_CACHE_TTL = 3600 * 24 * 7  # 7 days
