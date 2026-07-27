@@ -67,3 +67,10 @@ services:
       context: .
       dockerfile: Dockerfile
     image: cvat/server
+
+  # dev(self-hosted)는 Traefik web 진입점이 :8080이라 표준 포트가 아니다.
+  # base의 GF_SERVER_ROOT_URL(포트 없음)로는 Grafana가 생성하는 리다이렉트/URL이
+  # 포트 80을 가리켜 대시보드가 깨지므로, 실제 서빙 포트(:8080)를 명시한다.
+  cvat_grafana:
+    environment:
+      GF_SERVER_ROOT_URL: http://${CVAT_HOST:-localhost}:8080/analytics
