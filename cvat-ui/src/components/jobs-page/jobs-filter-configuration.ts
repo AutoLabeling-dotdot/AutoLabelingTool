@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: MIT
 
 import { Config } from '@react-awesome-query-builder/antd';
+import { JobStage } from 'cvat-core-wrapper';
 import asyncFetchUsers from 'components/resource-sorting-filtering/request-users';
+import appConfig from 'config';
+
+const STAGE_LIST_HEIGHT = appConfig.JOB_STAGE_DROPDOWN_LIST_HEIGHT;
 
 export const config: Partial<Config> = {
     fields: {
@@ -28,14 +32,13 @@ export const config: Partial<Config> = {
             operators: ['select_any_in', 'select_equals'],
             valueSources: ['value'],
             fieldSettings: {
-                listValues: [
-                    { value: 'annotation', title: 'annotation' },
-                    { value: 'validation', title: 'validation' },
-                    { value: 'validation1', title: 'validation1' },
-                    { value: 'validation2', title: 'validation2' },
-                    { value: 'validation3', title: 'validation3' },
-                    { value: 'acceptance', title: 'acceptance' },
-                ],
+                listValues: Object.values(JobStage).map((stage) => ({ value: stage, title: stage })),
+            },
+            // 'select_equals' renders the select widget, 'select_any_in' the multiselect one;
+            // customProps is spread onto the underlying antd Select by both
+            widgets: {
+                select: { widgetProps: { customProps: { listHeight: STAGE_LIST_HEIGHT } } },
+                multiselect: { widgetProps: { customProps: { listHeight: STAGE_LIST_HEIGHT } } },
             },
         },
         dimension: {

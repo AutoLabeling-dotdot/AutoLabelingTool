@@ -6,6 +6,7 @@ import React from 'react';
 import Select from 'antd/lib/select';
 import { JobStage, JobState } from 'cvat-core-wrapper';
 import { handleDropdownKeyDown } from 'utils/dropdown-utils';
+import config from 'config';
 
 interface JobStateSelectorProps {
     value: JobState | null;
@@ -44,25 +45,13 @@ export function JobStageSelector({ value, onSelect }: Readonly<JobStageSelectorP
             onChange={onSelect}
             onKeyDown={handleDropdownKeyDown}
             placeholder='Select a stage'
+            listHeight={config.JOB_STAGE_DROPDOWN_LIST_HEIGHT}
         >
-            <Select.Option value={JobStage.ANNOTATION}>
-                {JobStage.ANNOTATION}
-            </Select.Option>
-            <Select.Option value={JobStage.VALIDATION}>
-                {JobStage.VALIDATION}
-            </Select.Option>
-            <Select.Option value={JobStage.VALIDATION1}>
-                {JobStage.VALIDATION1}
-            </Select.Option>
-            <Select.Option value={JobStage.VALIDATION2}>
-                {JobStage.VALIDATION2}
-            </Select.Option>
-            <Select.Option value={JobStage.VALIDATION3}>
-                {JobStage.VALIDATION3}
-            </Select.Option>
-            <Select.Option value={JobStage.ACCEPTANCE}>
-                {JobStage.ACCEPTANCE}
-            </Select.Option>
+            { Object.values(JobStage).map((stage: JobStage) => (
+                <Select.Option key={stage} value={stage}>
+                    {stage}
+                </Select.Option>
+            )) }
         </Select>
     );
 }

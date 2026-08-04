@@ -202,7 +202,8 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             } = action.payload;
 
             const defaultLabel = job.labels.length ? job.labels[0] : null;
-            const isReview = [JobStage.VALIDATION, JobStage.VALIDATION1, JobStage.VALIDATION2, JobStage.VALIDATION3].includes(job.stage);
+            // covers 'validation' and every numbered variant ('validation1', ...)
+            const isReview = job.stage.startsWith(JobStage.VALIDATION);
             let workspaceSelected = null;
             let activeObjectType;
             let activeShapeType = null;

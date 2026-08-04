@@ -27,6 +27,13 @@ export enum JobStage {
     VALIDATION1 = 'validation1',
     VALIDATION2 = 'validation2',
     VALIDATION3 = 'validation3',
+    VALIDATION4 = 'validation4',
+    VALIDATION5 = 'validation5',
+    VALIDATION6 = 'validation6',
+    VALIDATION7 = 'validation7',
+    VALIDATION8 = 'validation8',
+    VALIDATION9 = 'validation9',
+    VALIDATION10 = 'validation10',
     ACCEPTANCE = 'acceptance',
 }
 

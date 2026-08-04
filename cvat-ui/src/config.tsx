@@ -22,6 +22,9 @@ const FILTERS_GUIDE_URL = 'https://docs.cvat.ai/docs/manual/advanced/filter/';
 const DATASET_MANIFEST_GUIDE_URL = 'https://docs.cvat.ai/docs/manual/advanced/dataset_manifest/';
 const CANVAS_BACKGROUND_COLORS = ['#ffffff', '#f1f1f1', '#e5e5e5', '#d8d8d8', '#CCCCCC', '#B3B3B3', '#999999'];
 const NEW_LABEL_COLOR = '#b3b3b3';
+// max popup height for the job stage dropdowns (antd default is 256px).
+// There are enough stages that the default popup felt too tall; the list scrolls anyway.
+const JOB_STAGE_DROPDOWN_LIST_HEIGHT = 120;
 const LATEST_COMMENTS_SHOWN_QUICK_ISSUE = 3;
 const QUICK_ISSUE_INCORRECT_POSITION_TEXT = 'Wrong position';
 const QUICK_ISSUE_INCORRECT_ATTRIBUTE_TEXT = 'Wrong attribute';
@@ -188,6 +191,7 @@ export default {
     CANVAS_WORKSPACE_MARGIN,
     CANVAS_WORKSPACE_PADDING,
     CANVAS_WORKSPACE_DEFAULT_CONTEXT_HEIGHT,
+    JOB_STAGE_DROPDOWN_LIST_HEIGHT,
     CONTROLS_LOGS_INTERVAL,
     ACTIVITY_EVENTS_INTERVAL_MS,
     RESET_NOTIFICATIONS_PATHS,

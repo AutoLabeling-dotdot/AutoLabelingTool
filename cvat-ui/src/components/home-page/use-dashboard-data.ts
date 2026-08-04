@@ -68,7 +68,7 @@ const taskJobsFilter = (taskId: number): string => JSON.stringify({
 });
 
 // Maps a job's stage to one of the 3 visualization buckets.
-// validation1/2/3 all collapse into "validation".
+// every numbered validation stage (validation1, validation2, ...) collapses into "validation".
 function bucketStage(stage: string): keyof StageCounts {
     if (stage === 'acceptance') return 'acceptance';
     if (stage && stage.startsWith('validation')) return 'validation';
