@@ -107,6 +107,20 @@ services:
     volumes:
       - /data/cvat/kvrocks:/var/lib/kvrocks
 
+  # 외부 Grafana에서 ClickHouse 데이터소스로 붙기 위한 HTTPS 엔드포인트.
+  # 8123 포트를 직접 퍼블리시하지 않고 Traefik이 TLS를 종료한 뒤 내부망으로 중계한다.
+  # 접근은 아래 허용 IP로만 제한된다.
+  cvat_clickhouse:
+    labels:
+      traefik.enable: 'true'
+      traefik.http.services.clickhouse.loadbalancer.server.port: '8123'
+      traefik.http.routers.clickhouse.rule: "Host(`clickhouse.${CVAT_HOST:-localhost}`)"
+      traefik.http.routers.clickhouse.entrypoints: websecure
+      traefik.http.routers.clickhouse.tls.certresolver: letsencrypt
+      traefik.http.routers.clickhouse.middlewares: clickhouse-allowlist
+      # 외부 Grafana 서버 공인 IP. 추가 시 콤마로 구분.
+      traefik.http.middlewares.clickhouse-allowlist.ipallowlist.sourcerange: '115.94.92.106/32'
+
   cvat_ui:
     image: 895409929723.dkr.ecr.ap-northeast-2.amazonaws.com/bytesize/main-dotdot-ui:latest
     labels:
